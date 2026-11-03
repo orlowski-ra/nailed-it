@@ -256,11 +256,12 @@
         <p class="lead">30 minut online, bezpłatnie i bez zobowiązań. Napisz, na co tracisz najwięcej czasu. Odezwę się, umówimy termin, a ja podpowiem, co da się z tym zrobić.</p>
         <div class="form-wrap">
           <p class="eyebrow">Napisz w 1 minutę</p>
-          <form class="contact" action="https://formsubmit.co/kontakt@nailed-it.org" method="POST">
-            <input type="hidden" name="_subject" value="Nowe zapytanie ze strony nailed-it.org">
-            <input type="hidden" name="_next" value="https://nailed-it.org/dziekuje.html">
-            <input type="hidden" name="_template" value="table">
-            <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <form class="contact" action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="9d799062-8a6f-465c-bfa2-8272f96223fa">
+            <input type="hidden" name="subject" value="Nowe zapytanie ze strony nailed-it.org">
+            <input type="hidden" name="from_name" value="Formularz nailed-it.org">
+            <input type="hidden" name="redirect" value="https://nailed-it.org/dziekuje.html">
+            <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
             <div><label for="f-name">Imię</label><input id="f-name" name="imie" type="text" autocomplete="given-name" required></div>
             <div><label for="f-contact">Telefon lub e-mail</label><input id="f-contact" name="kontakt" type="text" autocomplete="email" required></div>
             <div><label for="f-msg">Co zabiera Ci najwięcej czasu?</label><textarea id="f-msg" name="wiadomosc" placeholder="np. przepisywanie zamówień z maila do Excela"></textarea></div>
