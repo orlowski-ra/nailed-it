@@ -1,44 +1,99 @@
 <!doctype html>
-<html lang="pl">
+<html lang="pl" class="home">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NailedIT – automatyzacja dla małych firm | Warszawa i okolice</title>
 <meta name="description" content="Pomagam małym firmom pozbyć się powtarzalnej roboty: oferty, faktury, KSeF, raporty. Automatyzacje i proste aplikacje na miarę. Warszawa, Łomianki i zdalnie w całej Polsce.">
+<link rel="canonical" href="https://nailed-it.org/">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:site_name" content="NailedIT">
+<meta property="og:url" content="https://nailed-it.org/">
 <meta property="og:title" content="NailedIT – automatyzacja dla małych firm">
-<meta property="og:description" content="Automatyzacja jak w dużych firmach. Na miarę Twojej.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='700' font-size='20' text-anchor='middle' fill='%23c8ff3d'%3EN%3C/text%3E%3C/svg%3E">
+<meta property="og:description" content="Automatyzacja jak w dużych firmach. Na miarę Twojej. Warszawa, Łomianki i zdalnie w całej Polsce.">
+<meta property="og:image" content="https://nailed-it.org/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="NailedIT – Automatyzacja jak w dużych firmach. Na miarę Twojej.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js')</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "NailedIT",
+  "alternateName": "NailedIT – Rafał Orłowski",
+  "url": "https://nailed-it.org/",
+  "image": "https://nailed-it.org/og-image.png",
+  "email": "kontakt@nailed-it.org",
+  "description": "Automatyzacja procesów i proste aplikacje na miarę dla małych i średnich firm.",
+  "founder": {"@type": "Person", "name": "Rafał Orłowski", "sameAs": "https://www.linkedin.com/in/orlowskira"},
+  "address": {"@type": "PostalAddress", "streetAddress": "ul. Kościelna Droga 7A/2", "postalCode": "05-092", "addressLocality": "Łomianki", "addressCountry": "PL"},
+  "areaServed": [{"@type": "City", "name": "Warszawa"}, {"@type": "City", "name": "Łomianki"}, {"@type": "Country", "name": "Polska"}],
+  "taxID": "1181984436",
+  "vatID": "PL1181984436",
+  "sameAs": ["https://www.linkedin.com/in/orlowskira"]
+}
+</script>
 </head>
 <body>
+  <a class="skip" href="#tresc">Przejdź do treści</a>
+
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#" class="logo">Nailed<span>IT</span></a>
-      <nav class="nav">
+      <a href="#" class="logo" aria-label="NailedIT – na początek strony">Nailed<span>IT</span></a>
+      <nav class="nav" aria-label="Sekcje strony">
         <a href="#problem">Problem</a>
         <a href="#uslugi">Usługi</a>
         <a href="#przyklady">Przykłady</a>
-        <a href="#o-mnie">O mnie</a>
+        <a href="#o-mnie">O mnie</a>
         <a href="#kontakt">Kontakt</a>
       </nav>
       <a href="#kontakt" class="btn btn-sm">Umów rozmowę</a>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
+  <main id="tresc">
+    <section class="hero" id="start">
       <div class="container">
-        <p class="eyebrow">Automatyzacja dla małych firm · Warszawa i okolice, zdalnie w całej Polsce</p>
-        <h1>Automatyzacja jak w dużych firmach. <em>Na miarę Twojej.</em></h1>
-        <p class="lead">Pomagam małym i średnim firmom pozbyć się powtarzalnej roboty: zapytania od klientów, oferty, faktury, raporty. A gdy gotowe programy nie pasują, piszę proste aplikacje na miarę, także do pracy w terenie. Bez żargonu, z efektem, który widać w kalendarzu.</p>
-        <div class="actions">
-          <a href="#kontakt" class="btn">Umów bezpłatną rozmowę</a>
-          <a href="#przyklady" class="btn btn-ghost">Zobacz przykłady</a>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Automatyzacja dla małych firm · Warszawa i okolice, zdalnie w całej Polsce</p>
+            <h1>Automatyzacja jak w dużych firmach. <em>Na miarę Twojej.</em></h1>
+            <p class="lead">Pomagam małym i średnim firmom pozbyć się powtarzalnej roboty przy zapytaniach, ofertach, fakturach i raportach. Łączę programy, których już używasz, a gdy to nie wystarcza, piszę proste aplikacje na miarę, także do pracy w terenie. Bez żargonu, z efektem, który widać w kalendarzu.</p>
+            <div class="actions">
+              <a href="#kontakt" class="btn">Umów bezpłatną rozmowę <span class="arr" aria-hidden="true">→</span></a>
+              <a href="#przyklady" class="btn btn-ghost">Zobacz przykłady</a>
+            </div>
+          </div>
+
+          <figure class="flow" role="img" aria-label="Przykład automatyzacji: zapytanie z formularza samo zamienia się w ofertę PDF, mail do klienta i wpis w CRM, bez ręcznej pracy.">
+            <div class="flow-head">
+              <span class="flow-dots"><i></i><i></i><i></i></span>
+              <span>Przykład: nowe zapytanie</span>
+              <span class="flow-live">działa samo</span>
+            </div>
+            <ol class="flow-steps">
+              <li><span class="flow-ico"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span><b>Zapytanie z formularza</b><small>remont łazienki, 8 m²</small></span></li>
+              <li><span class="flow-ico"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span><b>Oferta PDF z szablonu</b><small>wycena według Twojego cennika</small></span></li>
+              <li><span class="flow-ico"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span><b>Mail do klienta</b><small>z ofertą w załączniku</small></span></li>
+              <li><span class="flow-ico"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span><b>Wpis w CRM</b><small>i przypomnienie o kontakcie za 3 dni</small></span></li>
+            </ol>
+            <div class="flow-foot"><span>Ręczna praca</span><b>0 min</b></div>
+          </figure>
         </div>
+
         <dl class="stats">
-          <div><dt>30 min</dt><dd>bezpłatnej rozmowy na start</dd></div>
-          <div><dt>2–6 tyg.</dt><dd>od pomysłu do działającej automatyzacji</dd></div>
-          <div><dt>1 osoba</dt><dd>od pierwszej rozmowy do wdrożenia: <a href="#o-mnie" style="color:var(--accent)">ja</a></dd></div>
+          <div><dt>30 min</dt><dd>bezpłatnej rozmowy na start</dd></div>
+          <div><dt>2–6 tyg.</dt><dd>od pomysłu do działającej automatyzacji</dd></div>
+          <div><dt>1 osoba</dt><dd>od pierwszej rozmowy do wdrożenia: <a href="#o-mnie">ja</a></dd></div>
         </dl>
       </div>
     </section>
@@ -46,41 +101,39 @@
     <section id="problem" class="section">
       <div class="container">
         <p class="eyebrow">Problem</p>
-        <h2>Co blokuje automatyzację w małej firmie?</h2>
+        <h2>Co blokuje automatyzację w małej firmie?</h2>
         <div class="grid-3">
-          <article class="card"><span class="num">01</span><h3>Brak czasu</h3><p>Właściciel robi wszystko sam. Nie ma kiedy szukać nowych narzędzi, a co dopiero ich wdrażać.</p></article>
-          <article class="card"><span class="num">02</span><h3>Brak zasobów</h3><p>Rozwiązania dla korporacji są drogie i skomplikowane. Łatwo uznać, że „to nie dla nas”.</p></article>
+          <article class="card"><span class="num">01</span><h3>Brak czasu</h3><p>Właściciel robi wszystko sam. Nie ma kiedy szukać nowych narzędzi, a co dopiero ich wdrażać.</p></article>
+          <article class="card"><span class="num">02</span><h3>Brak zasobów</h3><p>Rozwiązania dla korporacji są drogie i skomplikowane. Łatwo uznać, że „to nie dla nas”.</p></article>
           <article class="card"><span class="num">03</span><h3>Brak przewodnika</h3><p>Narzędzi jest mnóstwo, porad jeszcze więcej. Nie wiadomo, od czego zacząć.</p></article>
         </div>
       </div>
     </section>
 
-    <section class="section alt">
+    <section id="rozwiazanie" class="section alt">
       <div class="container split">
         <div>
           <p class="eyebrow">Rozwiązanie</p>
-          <h2>Jestem pomostem między Twoją firmą a automatyzacją.</h2>
+          <h2>Jestem pomostem między Twoją firmą a automatyzacją.</h2>
         </div>
         <ul class="checklist">
-          <li><strong>Szybka diagnoza.</strong> 1–2 dni rozmów i przeglądu procesów, zero żargonu.</li>
-          <li><strong>Praktyczne wdrożenie.</strong> Na narzędziach, których już używasz, albo na prostej aplikacji napisanej pod Ciebie. Ma działać, nie tylko ładnie wyglądać na prezentacji.</li>
-          <li><strong>Wsparcie po wdrożeniu.</strong> Zostaję, żeby zmiana się przyjęła.</li>
+          <li><strong>Szybka diagnoza.</strong> 1–2 dni rozmów i przeglądu tego, jak dziś pracujesz.</li>
+          <li><strong>Praktyczne wdrożenie.</strong> Na narzędziach, których już używasz, albo na prostej aplikacji napisanej pod Ciebie. Ma działać, a nie tylko ładnie wyglądać na prezentacji.</li>
+          <li><strong>Wsparcie po wdrożeniu.</strong> Zostaję, aż zmiana się przyjmie.</li>
           <li><strong>Mierzalny efekt.</strong> Liczę zaoszczędzone godziny, nie slajdy.</li>
         </ul>
       </div>
     </section>
 
-    
-
-    <section class="section">
+    <section id="obszary" class="section">
       <div class="container">
         <p class="eyebrow">Gdzie pomagam</p>
-        <h2>Cztery obszary, w których automatyzacja daje najszybszy efekt.</h2>
+        <h2>Cztery obszary, w których automatyzacja daje najszybszy efekt.</h2>
         <div class="grid-4">
-          <article class="card"><h3>Sprzedaż</h3><p>Szybsze odpowiedzi na zapytania, oferty z formularza, przypomnienia o follow-upie.</p></article>
+          <article class="card"><h3>Sprzedaż</h3><p>Szybsze odpowiedzi na zapytania, oferty z formularza, przypomnienia o kontakcie po wysłaniu oferty.</p></article>
           <article class="card"><h3>Obsługa klienta</h3><p>Potwierdzenia rezerwacji, przypomnienia SMS, odpowiedzi na najczęstsze pytania.</p></article>
-          <article class="card"><h3>Biuro i operacje</h3><p>Koniec z przepisywaniem danych między arkuszami, mailami i systemami.</p></article>
-          <article class="card"><h3>Finanse</h3><p>Faktury prosto do księgowości, KSeF, przypomnienia o płatnościach, raporty bez ręcznej roboty.</p></article>
+          <article class="card"><h3>Biuro i operacje</h3><p>Koniec z przepisywaniem danych między arkuszami, mailami i systemami.</p></article>
+          <article class="card"><h3>Finanse</h3><p>Faktury z KSeF prosto do księgowości, przypomnienia o płatnościach, raporty bez ręcznej roboty.</p></article>
         </div>
       </div>
     </section>
@@ -92,52 +145,68 @@
         <div class="services">
           <article class="service">
             <span class="num">01</span>
-            <div><h3>Diagnoza i plan działania</h3><p>Przeglądam, jak dziś pracujesz, i wskazuję, co warto zautomatyzować w pierwszej kolejności. Dostajesz mapę możliwości, 3–5 konkretnych rekomendacji i plan wdrożenia.</p></div>
-            <span class="tag">do 2 tygodni</span>
+            <div><h3>Diagnoza i plan działania</h3><p>Przeglądam, jak dziś pracujesz, i wskazuję, co warto zautomatyzować w pierwszej kolejności. Dostajesz mapę możliwości, 3–5 konkretnych rekomendacji i plan wdrożenia.</p></div>
+            <span class="tag">do 2 tygodni</span>
           </article>
           <article class="service">
             <span class="num">02</span>
-            <div><h3>Automatyzacja procesów</h3><p>Buduję przepływy, które pracują za Ciebie 24/7: dane trafiają tam, gdzie trzeba, bez kopiuj-wklej.</p></div>
-            <span class="tag">2–6 tygodni</span>
+            <div><h3>Automatyzacja procesów</h3><p>Buduję automatyczne procesy, które pracują za Ciebie 24/7: dane same trafiają tam, gdzie trzeba, bez kopiowania i wklejania.</p></div>
+            <span class="tag">2–6 tygodni</span>
           </article>
           <article class="service">
             <span class="num">03</span>
-            <div><h3>Proste aplikacje szyte na miarę</h3><p>Gdy gotowe programy są przeładowane funkcjami albo nie pasują do Twojej pracy, piszę proste, dedykowane aplikacje: do szybkich wycen, zleceń w terenie czy raportowania dla pracowników. Działają na telefonie i komputerze, dokładnie tak, jak potrzebujesz.</p></div>
-            <span class="tag">wg potrzeb</span>
+            <div><h3>Proste aplikacje szyte na miarę</h3><p>Gdy gotowe programy są przeładowane funkcjami albo nie pasują do Twojej pracy, piszę proste, dedykowane aplikacje: do szybkich wycen, zleceń w terenie czy raportowania dla pracowników. Działają na telefonie i komputerze, dokładnie tak, jak potrzebujesz.</p></div>
+            <span class="tag">zależnie od zakresu</span>
           </article>
         </div>
-        <p class="tools-line"> Zaczynam od tego, czego już używasz: <strong>Google Workspace, Microsoft 365, KSeF, Fakturownia, inFakt, wFirma, Pipedrive, HubSpot, bramki SMS</strong>. Łączę je ze sobą za pomocą Make, n8n, Zapiera i narzędzi AI (Claude, ChatGPT), a gdy to nie wystarcza, piszę własną aplikację.</p>
+        <div class="tools">
+          <div class="tools-row">
+            <span class="tools-label">Zaczynam od tego, czego używasz</span>
+            <ul class="chips">
+              <li>Google Workspace</li><li>Microsoft 365</li><li>KSeF</li><li>Fakturownia</li><li>inFakt</li><li>wFirma</li><li>Pipedrive</li><li>HubSpot</li><li>bramki SMS</li>
+            </ul>
+          </div>
+          <div class="tools-row">
+            <span class="tools-label">Łączę to za pomocą</span>
+            <ul class="chips chips-accent">
+              <li>Make</li><li>n8n</li><li>Zapier</li><li>Claude</li><li>ChatGPT</li><li>własnych aplikacji</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
     <section id="przyklady" class="section">
       <div class="container">
         <p class="eyebrow">Przykłady</p>
-        <h2>Jak to wygląda w praktyce: przed i po.</h2>
-        <p class="note">Przykładowe scenariusze z szacunkowym efektem. Twoje liczby policzymy na diagnozie.</p>
+        <h2>Jak to wygląda w praktyce: przed i po.</h2>
+        <p class="note">Przykładowe scenariusze z szacunkowym efektem. Twoje liczby policzymy na diagnozie.</p>
         <div class="cases">
           <article class="case">
-            <h3>Oferty z formularza</h3>
+            <p class="kpi"><b>≈ <span data-count="16">16</span> h</b><span>mniej pracy miesięcznie</span></p>
+            <h3>Oferty z formularza</h3>
             <dl>
-              <dt>Przed</dt><dd>Każdą ofertę składasz ręcznie w Wordzie: ok. 25 min na sztukę.</dd>
-              <dt>Rozwiązanie</dt><dd>Formularz na stronie → szablon oferty → PDF → mail do klienta + wpis w CRM.</dd>
-              <dt>Po</dt><dd class="result">Oferta w ok. 1 min. Przy 40 ofertach miesięcznie to ok. 15 h odzyskanego czasu.</dd>
+              <dt>Przed</dt><dd>Każdą ofertę składasz ręcznie w Wordzie: ok. 25 min na sztukę.</dd>
+              <dt>Rozwiązanie</dt><dd>Formularz na stronie → szablon oferty → PDF → mail do klienta + wpis w CRM.</dd>
+              <dt>Po</dt><dd class="result">Oferta gotowa w ok. 1 min. Przy 40 ofertach miesięcznie to ok. 16 h odzyskanego czasu.</dd>
             </dl>
           </article>
           <article class="case">
-            <h3>Faktury do księgowości</h3>
+            <p class="kpi"><b>≈ <span data-count="3">3</span> h</b><span>mniej pracy miesięcznie</span></p>
+            <h3>Faktury i płatności</h3>
             <dl>
-              <dt>Przed</dt><dd>Co miesiąc szukasz faktur kosztowych w mailu i przesyłasz je biuru rachunkowemu.</dd>
-              <dt>Rozwiązanie</dt><dd>Skrzynka → automatyczne wyłapanie faktur → folder w chmurze → biuro rachunkowe.</dd>
-              <dt>Po</dt><dd class="result">Zero ręcznego przesyłania i brakujących faktur. Ok. 3 h miesięcznie mniej.</dd>
+              <dt>Przed</dt><dd>Faktury kosztowe przychodzą do KSeF i na maila. Ktoś je zbiera, przekazuje do biura rachunkowego i pilnuje terminów płatności.</dd>
+              <dt>Rozwiązanie</dt><dd>KSeF i skrzynka → automatyczne pobranie faktur → biuro rachunkowe + lista płatności z terminami.</dd>
+              <dt>Po</dt><dd class="result">Komplet faktur bez szukania i żadnego przegapionego terminu. Ok. 3 h miesięcznie mniej.</dd>
             </dl>
           </article>
           <article class="case">
-            <h3>Raporty z terenu</h3>
+            <p class="kpi"><b>≈ <span data-count="20">20</span> h</b><span>mniej pracy biura miesięcznie</span></p>
+            <h3>Raporty z terenu</h3>
             <dl>
-              <dt>Przed</dt><dd>Ekipa dzwoni albo pisze SMS-y, zdjęcia giną w telefonach, a biuro wieczorem przepisuje wszystko do kosztorysu.</dd>
-              <dt>Rozwiązanie</dt><dd>Prosta aplikacja na telefon: zlecenie → zdjęcia i zużyte materiały → raport prosto do biura i kosztorysu.</dd>
-              <dt>Po</dt><dd class="result">Raport w 2 minuty na miejscu, zero przepisywania. Przy 5 ekipach ok. 20 h miesięcznie mniej pracy biura.</dd>
+              <dt>Przed</dt><dd>Ekipa dzwoni albo pisze SMS-y, zdjęcia giną w telefonach, a biuro wieczorem przepisuje wszystko do kosztorysu.</dd>
+              <dt>Rozwiązanie</dt><dd>Prosta aplikacja na telefon: zlecenie → zdjęcia i zużyte materiały → raport prosto do biura i kosztorysu.</dd>
+              <dt>Po</dt><dd class="result">Raport w 2 minuty na miejscu, zero przepisywania. Przy 5 ekipach ok. 20 h miesięcznie mniej pracy biura.</dd>
             </dl>
           </article>
         </div>
@@ -146,33 +215,36 @@
 
     <section id="proces" class="section alt">
       <div class="container">
-        <p class="eyebrow">Jak pracujemy</p>
+        <p class="eyebrow">Jak wygląda współpraca</p>
         <h2>Cztery kroki, bez niespodzianek.</h2>
         <ol class="steps">
-          <li><span class="num">1</span><h3>Diagnoza</h3><p>Poznaję firmę, procesy i cele.</p><small>1–2 dni</small></li>
-          <li><span class="num">2</span><h3>Plan</h3><p>Priorytety, narzędzia, harmonogram.</p><small>do 1 tygodnia</small></li>
-          <li><span class="num">3</span><h3>Wdrożenie</h3><p>Konfiguracja, integracja, szkolenie.</p><small>2–6 tygodni</small></li>
-          <li><span class="num">4</span><h3>Opieka</h3><p>Mierzę efekty i poprawiam.</p><small>na bieżąco</small></li>
+          <li><span class="num">1</span><h3>Diagnoza</h3><p>Poznaję firmę, procesy i cele.</p><small>1–2 dni</small></li>
+          <li><span class="num">2</span><h3>Plan</h3><p>Priorytety, narzędzia, harmonogram.</p><small>do 1 tygodnia</small></li>
+          <li><span class="num">3</span><h3>Wdrożenie</h3><p>Konfiguracja, integracja, szkolenie.</p><small>2–6 tygodni</small></li>
+          <li><span class="num">4</span><h3>Opieka</h3><p>Mierzę efekty i poprawiam.</p><small>na bieżąco</small></li>
         </ol>
       </div>
     </section>
 
     <section id="o-mnie" class="section">
       <div class="container">
-        <p class="eyebrow">Z kim pracujesz</p>
-        <div class="about" style="grid-template-columns:1fr;max-width:760px">
-          <div>
-            <h3>Rafał Orłowski</h3>
+        <p class="eyebrow">Z kim pracujesz</p>
+        <div class="about">
+          <div class="about-head">
+            <h2>Rafał Orłowski</h2>
             <p class="role">Założyciel NailedIT · Łomianki / Warszawa</p>
-            <p>Zajmuję się tym, żeby programy w firmie same wymieniały się danymi, zamiast żeby ktoś je ręcznie przepisywał. Przez lata pracowałem przy dużych systemach płatności i e-faktur, więc wiem, jak zrobić to porządnie i bezpiecznie. W małej firmie robię to samo, tylko prościej: zaczynam od tego, co zabiera Ci najwięcej czasu, i zostawiam rozwiązanie, z którego Ty i Twój zespół korzystacie od następnego dnia.</p>
-            <p>Jeśli działasz w Warszawie lub okolicach Łomianek, chętnie przyjadę i zobaczę na miejscu, jak pracujecie.</p>
+            <a href="https://www.linkedin.com/in/orlowskira" class="btn btn-ghost" target="_blank" rel="noopener">LinkedIn <span class="arr" aria-hidden="true">→</span></a>
+          </div>
+          <div class="about-text">
+            <p>Zajmuję się tym, żeby programy w firmie same wymieniały się danymi, zamiast żeby ktoś je ręcznie przepisywał. Przez lata pracowałem przy dużych systemach płatności i e-faktur, więc wiem, jak zrobić to porządnie i bezpiecznie.</p>
+            <p>W małej firmie robię to samo, tylko prościej: zaczynam od tego, co zabiera Ci najwięcej czasu, i zostawiam rozwiązanie, z którego Ty i Twój zespół korzystacie od następnego dnia. Jeśli działasz w Warszawie lub okolicach Łomianek, chętnie przyjadę i zobaczę na miejscu, jak pracujecie.</p>
             <ul class="facts">
               <li>Mówię po ludzku, bez technicznego żargonu</li>
-              <li>Znam KSeF i e-faktury od podszewki</li>
-              <li>Zaczynam od narzędzi, które już masz, a gdy nie wystarczają, piszę własne</li>
+              <li>Znam KSeF i e-faktury od podszewki</li>
+              <li>Zaczynam od narzędzi, które już masz, a gdy nie wystarczają, piszę własne</li>
+              <li>Dbam o bezpieczeństwo: dostęp tylko do tego, co naprawdę potrzebne</li>
               <li>Sam prowadzę każdy projekt, od rozmowy po wdrożenie</li>
             </ul>
-            <a href="https://www.linkedin.com/in/orlowskira" class="btn btn-ghost" target="_blank" rel="noopener">LinkedIn →</a>
           </div>
         </div>
       </div>
@@ -180,24 +252,22 @@
 
     <section id="kontakt" class="section cta">
       <div class="container">
-        <h2>Gotowy na pierwszy krok?</h2>
-        <p class="lead">30 minut bezpłatnej rozmowy online, bez zobowiązań. Zostaw kilka słów, odezwę się i umówimy termin. Powiesz mi, co Cię zjada czasowo, a ja podpowiem, co da się z tym zrobić.</p>
-        <div class="contact-grid" style="grid-template-columns:1fr;max-width:560px;margin-left:auto;margin-right:auto">
-          <div>
-            <p class="eyebrow" style="text-align:center">Napisz w 1 minutę</p>
-            <form class="contact" action="https://formsubmit.co/kontakt@nailed-it.org" method="POST">
-              <input type="hidden" name="_subject" value="Nowe zapytanie ze strony nailed-it.org">
-              <input type="hidden" name="_next" value="https://nailed-it.org/dziekuje.html">
-              <input type="hidden" name="_template" value="table">
-              <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
-              <div><label for="f-name">Imię</label><input id="f-name" name="imie" type="text" required></div>
-              <div><label for="f-contact">Telefon lub e-mail</label><input id="f-contact" name="kontakt" type="text" required></div>
-              <div><label for="f-msg">Co zabiera Ci najwięcej czasu?</label><textarea id="f-msg" name="wiadomosc" placeholder="np. przepisywanie zamówień z maila do Excela"></textarea></div>
-              <label class="rodo"><input type="checkbox" name="zgoda" value="tak" required><span>Zgadzam się na kontakt telefoniczny lub mailowy w sprawie mojego zapytania. Szczegóły w <a href="polityka-prywatnosci.html">polityce prywatności</a>.</span></label>
-              <button class="btn" type="submit">Wyślij</button>
-            </form>
-            <p class="contact-alt">Wolisz zwykły mail? <a href="mailto:kontakt@nailed-it.org">kontakt@nailed-it.org</a></p>
-          </div>
+        <h2>Zacznijmy od rozmowy.</h2>
+        <p class="lead">30 minut online, bezpłatnie i bez zobowiązań. Napisz, na co tracisz najwięcej czasu. Odezwę się, umówimy termin, a ja podpowiem, co da się z tym zrobić.</p>
+        <div class="form-wrap">
+          <p class="eyebrow">Napisz w 1 minutę</p>
+          <form class="contact" action="https://formsubmit.co/kontakt@nailed-it.org" method="POST">
+            <input type="hidden" name="_subject" value="Nowe zapytanie ze strony nailed-it.org">
+            <input type="hidden" name="_next" value="https://nailed-it.org/dziekuje.html">
+            <input type="hidden" name="_template" value="table">
+            <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <div><label for="f-name">Imię</label><input id="f-name" name="imie" type="text" autocomplete="given-name" required></div>
+            <div><label for="f-contact">Telefon lub e-mail</label><input id="f-contact" name="kontakt" type="text" autocomplete="email" required></div>
+            <div><label for="f-msg">Co zabiera Ci najwięcej czasu?</label><textarea id="f-msg" name="wiadomosc" placeholder="np. przepisywanie zamówień z maila do Excela"></textarea></div>
+            <label class="rodo"><input type="checkbox" name="zgoda" value="tak" required><span>Zgadzam się na kontakt telefoniczny lub mailowy w sprawie mojego zapytania. Szczegóły w <a href="polityka-prywatnosci.html">polityce prywatności</a>.</span></label>
+            <button class="btn" type="submit">Wyślij wiadomość <span class="arr" aria-hidden="true">→</span></button>
+          </form>
+          <p class="contact-alt">Wolisz zwykły mail? <a href="mailto:kontakt@nailed-it.org">kontakt@nailed-it.org</a></p>
         </div>
       </div>
     </section>
@@ -209,15 +279,17 @@
         <a href="#" class="logo">Nailed<span>IT</span></a>
         <p>Automatyzacja dla małych firm<br>
         <a href="polityka-prywatnosci.html">Polityka prywatności</a><br>
-        © 2026 NailedIT</p>
+        © 2026 NailedIT</p>
       </div>
       <address class="company">
-        <strong>NailedIT – Rafał Orłowski</strong><br>
-        ul. Kościelna Droga 7A/2, 05-092 Łomianki<br>
+        <strong>NailedIT – Rafał Orłowski</strong><br>
+        ul. Kościelna Droga 7A/2, 05-092 Łomianki<br>
         NIP 1181984436 · REGON 384404599<br>
         <a href="mailto:kontakt@nailed-it.org">kontakt@nailed-it.org</a>
       </address>
     </div>
   </footer>
+
+  <script src="main.js" defer></script>
 </body>
 </html>
