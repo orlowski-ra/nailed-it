@@ -111,3 +111,4 @@ form.contact button{cursor:pointer;font:inherit}
 .legal p,.legal li{color:var(--muted)}
 .legal a{color:var(--accent)}
 .legal strong{color:var(--text)}
+form.contact .rodo a{color:var(--text);border-bottom:1px solid #444}
