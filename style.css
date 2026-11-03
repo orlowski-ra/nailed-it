@@ -214,9 +214,7 @@ form.contact .btn{width:100%;margin-top:6px}
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .8s var(--ease)}
 .js .reveal.in{opacity:1;transform:none}
 
-/* --- sekcje jako ekrany i przyciąganie przewijania (strona główna) --- */
-html.home{scroll-snap-type:y proximity}
-.home main > section,.home .site-footer{scroll-snap-align:start}
+/* --- sekcje jako ekrany (strona główna, komputer) --- */
 @media (min-width:821px) and (min-height:640px){
   .home main > section{min-height:calc(100vh - var(--header));min-height:calc(100svh - var(--header));display:flex;align-items:center}
   .home main > section > .container{width:100%}
@@ -252,7 +250,6 @@ html.home{scroll-snap-type:y proximity}
 /* --- ograniczony ruch i druk --- */
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  html.home{scroll-snap-type:none}
   .hero *,.flow *{animation:none!important}
   .js .reveal{opacity:1;transform:none;transition:none}
   .steps li::before{transform:scaleX(1);transition:none}
