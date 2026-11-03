@@ -70,7 +70,7 @@
     [].forEach.call(d.querySelectorAll('main > section'), function (s) { spy.observe(s); });
   }
 
-  /* 4. Animowany przykład automatyzacji w nagłówku */
+  /* 4. Animowany przykład automatyzacji w nagłówku (odtwarza się raz) */
   var flow = d.querySelector('.flow');
   if (flow) {
     var steps = flow.querySelectorAll('.flow-steps li');
@@ -90,14 +90,9 @@
           if (i > 0) { steps[i - 1].classList.remove('active'); steps[i - 1].classList.add('done'); }
           steps[i].classList.add('active');
           timer = setTimeout(tick, 1000);
-        } else if (i === steps.length) {
-          finish();
-          timer = setTimeout(tick, 3200);
         } else {
-          [].forEach.call(steps, function (s) { s.classList.remove('active', 'done'); });
-          flow.classList.remove('complete');
-          i = -1;
-          timer = setTimeout(tick, 600);
+          finish(); /* raz i zostaje na ostatniej klatce */
+          timer = 'koniec';
         }
       };
       if (hasIO) {
