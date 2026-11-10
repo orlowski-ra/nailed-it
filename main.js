@@ -7,9 +7,9 @@
   if (hasIO && !reduce) {
     var sel = [
       'main > section:not(.hero) .eyebrow', 'main > section:not(.hero) h2', '.cta .lead', '.note',
-      '.card', '.case', '.service', '.tools', '.steps li', '.checklist li', '.about-text', '.form-wrap'
+      '.card', '.case', '.cases-cta', '.service', '.price-note', '.tools', '.steps li', '.about-text', '.form-wrap'
     ];
-    var stagger = '.card,.case,.service,.steps li,.checklist li';
+    var stagger = '.card,.case,.service,.steps li';
     var vh = w.innerHeight;
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -31,14 +31,15 @@
     [].forEach.call(d.querySelectorAll('.steps li'), function (el) { el.classList.add('in'); });
   }
 
-  /* 2. Liczby w przykładach odliczają się od zera */
+  /* 2. Liczby w przykładach odliczają się od zera.
+        Zerujemy je dopiero w chwili wjazdu w ekran: bez animacji w HTML zostaje prawdziwa liczba, nie „0”. */
   if (hasIO && !reduce) {
-    var counters = d.querySelectorAll('[data-count]');
     var cio = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         cio.unobserve(e.target);
         var el = e.target, to = +el.getAttribute('data-count'), t0 = null, dur = 1100;
+        el.textContent = '0';
         setTimeout(function () {
           w.requestAnimationFrame(function step(t) {
             if (t0 === null) t0 = t;
@@ -49,7 +50,7 @@
         }, 250);
       });
     }, { threshold: 0.6 });
-    [].forEach.call(counters, function (el) { el.textContent = '0'; cio.observe(el); });
+    [].forEach.call(d.querySelectorAll('[data-count]'), function (el) { cio.observe(el); });
   }
 
   /* 3. Aktywny link w menu */
@@ -105,12 +106,44 @@
     }
   }
 
-  /* 5. Formularz: bez podwójnego wysłania */
+  /* 5. Formularz: wysyłka w tle, komunikat po polsku przy błędzie, bez podwójnego wysłania.
+        Bez JS (albo w starej przeglądarce) formularz wysyła się zwyczajnie,
+        a Web3Forms sam przekierowuje na dziekuje.html. */
   var form = d.querySelector('form.contact');
   if (form) {
-    form.addEventListener('submit', function () {
-      var b = form.querySelector('button[type=submit]');
-      if (b) { b.disabled = true; b.textContent = 'Wysyłanie…'; }
+    var btn = form.querySelector('button[type=submit]');
+    var msg = d.getElementById('form-msg');
+    var label = btn ? btn.innerHTML : '';
+    var busy = function (on) {
+      if (!btn) return;
+      btn.disabled = on;
+      if (on) btn.textContent = 'Wysyłanie…'; else btn.innerHTML = label;
+    };
+    var canFetch = w.fetch && w.FormData && FormData.prototype['delete'];
+
+    form.addEventListener('submit', function (e) {
+      if (!canFetch) { busy(true); return; }
+      e.preventDefault();
+      if (msg) msg.textContent = '';
+      busy(true);
+      var data = new FormData(form);
+      data['delete']('redirect'); /* w tle chcemy odpowiedź, nie przekierowanie */
+      fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
+        .then(function (r) {
+          /* Web3Forms odpowiada JSON-em {success: true|false}; gdyby odpowiedział czymś innym, decyduje status */
+          return r.json().then(function (j) { return !!(j && j.success); }, function () { return r.ok; });
+        })
+        .then(function (ok) {
+          if (!ok) throw new Error('web3forms');
+          w.location.href = 'dziekuje.html';
+        })
+        ['catch'](function () {
+          busy(false);
+          if (msg) msg.textContent = 'Nie udało się wysłać wiadomości. Spróbuj jeszcze raz albo napisz na kontakt@nailed-it.org.';
+        });
     });
+
+    /* po powrocie przyciskiem „Wstecz” przycisk nie może zostać zablokowany */
+    w.addEventListener('pageshow', function () { busy(false); });
   }
 })();
