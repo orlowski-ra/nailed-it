@@ -3,10 +3,18 @@
   var reduce = w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hasIO = 'IntersectionObserver' in w;
 
-  /* 1. Treść wjeżdża przy przewijaniu (tylko to, czego jeszcze nie widać) */
+  /* 0. Opowieść (sekcje od „Problem” do „O mnie” w przypiętym kadrze) działa tylko z ruchem i sticky.
+        Klasę dajemy od razu, żeby reszta skryptu wiedziała, które elementy obsługuje opowieść. */
+  var story = d.querySelector('.story');
+  var canSticky = w.CSS && CSS.supports && (CSS.supports('position', 'sticky') || CSS.supports('position', '-webkit-sticky'));
+  var live = !!(story && !reduce && canSticky && w.requestAnimationFrame);
+  if (live) story.classList.add('is-live');
+  var inStory = function (el) { return live && story.contains(el); };
+
+  /* 1. Treść wjeżdża przy przewijaniu (tylko to, czego jeszcze nie widać; w opowieści robi to sam krok) */
   if (hasIO && !reduce) {
     var sel = [
-      'main > .section .eyebrow', 'main > .section h2', '.cta .lead', '.note',
+      '.section .eyebrow', '.section h2', '.cta .lead', '.note',
       '.card', '.case', '.cases-cta', '.service', '.price-note', '.tools', '.steps li', '.about-text', '.form-wrap'
     ];
     var stagger = '.card,.case,.service,.steps li';
@@ -18,7 +26,7 @@
     }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
 
     [].forEach.call(d.querySelectorAll(sel.join(',')), function (el) {
-      if (el.parentElement.closest('.reveal')) return;
+      if (inStory(el) || el.parentElement.closest('.reveal')) return;
       if (el.getBoundingClientRect().top < vh) { el.classList.add('in'); return; }
       if (el.matches(stagger)) {
         var i = [].indexOf.call(el.parentElement.children, el);
@@ -32,39 +40,45 @@
   }
 
   /* 2. Liczby w przykładach odliczają się od zera.
-        Zerujemy je dopiero w chwili wjazdu w ekran: bez animacji w HTML zostaje prawdziwa liczba, nie „0”. */
+        Zerujemy je dopiero w chwili startu: bez animacji w HTML zostaje prawdziwa liczba, nie „0”. */
+  var countUp = function (el) {
+    if (el.getAttribute('data-done')) return;
+    el.setAttribute('data-done', '1');
+    var to = +el.getAttribute('data-count'), t0 = null, dur = 1100;
+    el.textContent = '0';
+    setTimeout(function () {
+      w.requestAnimationFrame(function step(t) {
+        if (t0 === null) t0 = t;
+        var p = Math.min((t - t0) / dur, 1);
+        el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) w.requestAnimationFrame(step);
+      });
+    }, 250);
+  };
   if (hasIO && !reduce) {
     var cio = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         cio.unobserve(e.target);
-        var el = e.target, to = +el.getAttribute('data-count'), t0 = null, dur = 1100;
-        el.textContent = '0';
-        setTimeout(function () {
-          w.requestAnimationFrame(function step(t) {
-            if (t0 === null) t0 = t;
-            var p = Math.min((t - t0) / dur, 1);
-            el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
-            if (p < 1) w.requestAnimationFrame(step);
-          });
-        }, 250);
+        countUp(e.target);
       });
     }, { threshold: 0.6 });
-    [].forEach.call(d.querySelectorAll('[data-count]'), function (el) { cio.observe(el); });
+    [].forEach.call(d.querySelectorAll('[data-count]'), function (el) { if (!inStory(el)) cio.observe(el); });
   }
 
-  /* 3. Aktywny link w menu */
+  /* 3. Aktywny link w menu (w opowieści ustawia go aktywny krok) */
   var links = d.querySelectorAll('.nav a[href^="#"]');
+  var byId = {};
+  [].forEach.call(links, function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+  var setActive = function (a) {
+    [].forEach.call(links, function (l) { l.classList.toggle('active', l === a); });
+  };
   if (hasIO && links.length) {
-    var byId = {};
-    [].forEach.call(links, function (a) { byId[a.getAttribute('href').slice(1)] = a; });
-    var setActive = function (a) {
-      [].forEach.call(links, function (l) { l.classList.toggle('active', l === a); });
-    };
     var spy = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         if (e.target.classList.contains('hero')) setActive(null);
+        else if (e.target === story && live) story.dispatchEvent(new Event('navsync'));
         else if (byId[e.target.id]) setActive(byId[e.target.id]);
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
@@ -147,33 +161,53 @@
     w.addEventListener('pageshow', function () { busy(false); });
   }
 
-  /* 6. Opowieść: ekran przypięty na czas przewijania, trzy kroki przechodzą płynnie jeden w drugi,
-        a w tle kropki układają się od chaosu (problem), przez płynące linie (automatyzacja), do równej siatki (efekt).
+  /* 6. Opowieść: kadr przypięty na czas przewijania, kroki przechodzą płynnie jeden w drugi.
+        Krok dłuższy niż ekran przesuwa się w kadrze razem z przewijaniem, a dopiero potem ustępuje następnemu.
+        W tle kropki: chaos (problem) → płynące linie (automatyzacja) → równa siatka (efekt i dalej).
         Bez JS albo przy ograniczonym ruchu kroki zostają zwykłymi sekcjami jedna pod drugą. */
-  var story = d.querySelector('.story');
-  var canSticky = w.CSS && CSS.supports && (CSS.supports('position', 'sticky') || CSS.supports('position', '-webkit-sticky'));
-  if (story && !reduce && canSticky && w.requestAnimationFrame) {
-    story.classList.add('is-live');
+  if (live) {
     var pin = story.querySelector('.story-pin');
-    var stepsEl = story.querySelectorAll('.story-step');
+    var stage = story.querySelector('.story-stage');
+    var stepsEl = [].slice.call(story.querySelectorAll('.story-step'));
+    var inners = stepsEl.map(function (el) { return el.querySelector('.story-inner'); });
     var navA = story.querySelectorAll('.story-nav a');
     var bar = story.querySelector('.story-bar i');
     var canvas = story.querySelector('.story-canvas');
     var ctx = canvas && canvas.getContext && canvas.getContext('2d');
     var n = stepsEl.length, cur = -1, morph = 0, morphTo = 0, inView = false, raf = 0, last = 0;
-    var W = 0, H = 0, dpr = 1, dots = [], LANES = 5;
+    var seg = [], total = 1, frameH = 0;
+    /* krok → link w menu u góry (Współpraca nie ma własnego) */
+    var menuFor = { 'krok-1': 'problem', 'krok-2': 'problem', 'krok-3': 'problem', przyklady: 'przyklady', uslugi: 'uslugi', 'o-mnie': 'o-mnie' };
 
-    var metrics = function () {
+    var layout = function () {
+      frameH = stage.clientHeight;
+      var pad = Math.min(56, Math.max(28, frameH * 0.06)), acc = 0;
+      seg = inners.map(function (inner, i) {
+        var h = inner.offsetHeight;
+        var travel = Math.max(0, Math.ceil(h + pad * 2 - frameH));
+        var top = travel ? pad : Math.round((frameH - h) / 2);
+        var hold = frameH * (i < 3 ? 1 : 0.8);
+        var s = { start: acc, travel: travel, top: top, lead: hold * 0.3, len: travel + hold };
+        acc += s.len;
+        return s;
+      });
+      total = acc;
+      story.style.height = Math.round(pin.offsetHeight + total) + 'px';
+    };
+    var startY = function () {
       var top = parseFloat(getComputedStyle(pin).top) || 0;
-      var r = story.getBoundingClientRect();
-      var dist = Math.max(1, story.offsetHeight - pin.offsetHeight);
-      return { top: top, dist: dist, start: r.top + w.pageYOffset - top };
+      return story.getBoundingClientRect().top + w.pageYOffset - top;
+    };
+    var placeInner = function (i, t) {
+      var s = seg[i];
+      var y = s.top - Math.min(s.travel, Math.max(0, t - s.lead));
+      inners[i].style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
     };
 
     var setStep = function (i) {
       if (i === cur) return;
       cur = i;
-      [].forEach.call(stepsEl, function (el, k) {
+      stepsEl.forEach(function (el, k) {
         el.classList.toggle('is-active', k === i);
         el.classList.toggle('is-past', k < i);
       });
@@ -181,36 +215,75 @@
         a.classList.toggle('is-active', k === i);
         if (k === i) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
       });
+      story.classList.toggle('is-dense', i >= 3);
+      /* to, co poza opowieścią robi się przy wjeździe w ekran, tu startuje razem z krokiem */
+      [].forEach.call(stepsEl[i].querySelectorAll('[data-count]'), countUp);
+      [].forEach.call(stepsEl[i].querySelectorAll('.steps li'), function (li) { li.classList.add('in'); });
+      syncMenu();
     };
+    var syncMenu = function () {
+      var r = story.getBoundingClientRect();
+      var mid = w.innerHeight / 2;
+      if (r.top < mid && r.bottom > mid && cur >= 0) setActive(byId[menuFor[stepsEl[cur].id]] || null);
+    };
+    story.addEventListener('navsync', syncMenu);
 
     var onScroll = function () {
-      var m = metrics();
-      var p = Math.min(1, Math.max(0, (w.pageYOffset - m.start) / m.dist));
-      setStep(Math.min(n - 1, Math.floor(p * n)));
-      morphTo = Math.min(n - 1, Math.max(0, p * n - 0.5));
-      if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
-      story.classList.toggle('is-done', p > 0.97);
+      var y = Math.min(total, Math.max(0, w.pageYOffset - startY()));
+      var i = 0;
+      while (i < n - 1 && y >= seg[i + 1].start) i++;
+      var t = y - seg[i].start;
+      for (var k = 0; k < n; k++) placeInner(k, k < i ? 1e9 : (k > i ? 0 : t));
+      setStep(i);
+      morphTo = Math.min(2, Math.max(0, i + t / seg[i].len - 0.5));
+      if (bar) bar.style.transform = 'scaleX(' + (y / total).toFixed(4) + ')';
+      story.classList.toggle('is-moved', y > 40);
       kick();
     };
 
-    /* klawiatura i czytniki ekranu: fokus w ukrytym kroku przewija do niego */
-    [].forEach.call(stepsEl, function (el, i) {
-      el.addEventListener('focusin', function () {
-        if (i === cur) return;
-        var m = metrics();
-        w.scrollTo(0, Math.round(m.start + m.dist * (i + 0.3) / n));
-      });
-    });
-
+    /* przewinięcie do kroku (i ewentualnie do miejsca w długim kroku) */
+    var goTo = function (i, within, smooth) {
+      var top = Math.round(startY() + seg[i].start + (within || 0)) + 2;
+      w.scrollTo({ top: top, behavior: smooth ? 'smooth' : 'instant' }); /* 'instant', bo CSS ma scroll-behavior: smooth */
+    };
+    var stepOf = function (el) {
+      for (var i = 0; i < n; i++) if (stepsEl[i] === el || stepsEl[i].contains(el)) return i;
+      return -1;
+    };
     [].forEach.call(navA, function (a, i) {
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        var m = metrics();
-        w.scrollTo({ top: Math.round(m.start + m.dist * (i + 0.3) / n), behavior: 'smooth' });
+      a.addEventListener('click', function (e) { e.preventDefault(); goTo(i, 0, true); });
+    });
+    /* linki z menu i z treści do sekcji, które są teraz krokami */
+    d.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || a.closest('.story-nav')) return;
+      var id = a.getAttribute('href').slice(1);
+      var target = id && d.getElementById(id);
+      if (!target || !story.contains(target)) return;
+      e.preventDefault();
+      var i = target === story ? 0 : stepOf(target);
+      if (i < 0) return;
+      goTo(i, 0, true);
+      if (history.pushState) history.pushState(null, '', '#' + id);
+    });
+    /* klawiatura i czytniki ekranu: fokus w ukrytym kroku albo poza kadrem przewija do niego */
+    stepsEl.forEach(function (el, i) {
+      el.addEventListener('focusin', function (e) {
+        /* po własnym przewinięciu przeglądarki do fokusu */
+        setTimeout(function () { focusStep(i, e.target); }, 30);
       });
     });
+    var focusStep = function (i, el) {
+      if (d.activeElement !== el) return;
+      var er = el.getBoundingClientRect(), fr = stage.getBoundingClientRect();
+      if (i === cur && er.top >= fr.top && er.bottom <= fr.bottom) return;
+      var rel = er.top - inners[i].getBoundingClientRect().top;
+      var within = seg[i].travel ? seg[i].lead + Math.min(seg[i].travel, Math.max(0, rel - frameH / 2)) : 0;
+      goTo(i, within, false);
+    };
 
     /* kropki w tle */
+    var W = 0, H = 0, dpr = 1, dots = [], LANES = 5;
     var seed = 7;
     var rnd = function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
     var build = function () {
@@ -222,9 +295,8 @@
       var narrow = W < 821;
       var cols = narrow ? 9 : 12, rows = narrow ? 12 : 9;
       var gx0 = narrow ? 0.1 : 0.54, gx1 = narrow ? 0.9 : 0.92, gy0 = 0.16, gy1 = 0.8;
-      var count = cols * rows;
       seed = 7; dots = [];
-      for (var i = 0; i < count; i++) {
+      for (var i = 0; i < cols * rows; i++) {
         var c = i % cols, r = Math.floor(i / cols);
         dots.push({
           ax: rnd(), ay: rnd(), ph: rnd() * 6.28,
@@ -243,7 +315,6 @@
       ctx.clearRect(0, 0, W, H);
       var k1 = ease(Math.min(1, morph)), k2 = ease(Math.max(0, morph - 1));
       var narrow = W < 821, lx0 = narrow ? 0 : W * 0.45;
-      /* linie, po których płyną dane (widoczne w kroku 2) */
       var laneA = k1 * (1 - k2);
       if (laneA > 0.01) {
         ctx.lineWidth = 1;
@@ -281,12 +352,25 @@
       }).observe(story);
     } else { inView = true; }
 
+    var relayout = function () { layout(); build(); onScroll(); };
     var rt = null;
     w.addEventListener('resize', function () {
       clearTimeout(rt);
-      rt = setTimeout(function () { build(); onScroll(); }, 120);
+      rt = setTimeout(relayout, 120);
     });
     w.addEventListener('scroll', onScroll, { passive: true });
-    build(); onScroll(); morph = morphTo;
+    relayout(); morph = morphTo;
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(relayout);
+    w.addEventListener('load', relayout);
+
+    /* adres typu /#uslugi: przy wejściu na stronę i przy „Wstecz/Dalej” */
+    var fromHash = function () {
+      var h = location.hash.slice(1), ht = h && d.getElementById(h);
+      if (!ht || !story.contains(ht) || ht === story) return;
+      var hi = stepOf(ht);
+      if (hi >= 0) goTo(hi, 0, false);
+    };
+    setTimeout(fromHash, 0);
+    w.addEventListener('hashchange', fromHash);
   }
 })();
