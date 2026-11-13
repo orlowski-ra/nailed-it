@@ -281,7 +281,9 @@
     var menuFor = { problem: 'problem', 'krok-2': 'problem', 'krok-3': 'problem', przyklady: 'przyklady', uslugi: 'uslugi', 'o-mnie': 'o-mnie' };
     /* Tempo jednakowe dla wszystkich kroków (Rafał: +50%, potem jeszcze +30%):
        SPEED = ile px przesuwa się treść na 1 px przewinięcia, HOLD = postój kroku jako część wysokości kadru. */
-    var SPEED = 1.95, HOLD = 0.8 / SPEED;
+    var touch = w.matchMedia && w.matchMedia('(pointer: coarse)').matches;
+    /* Na dotyku treść idzie za palcem 1:1, a krokami steruje gest (niżej), więc inne stałe. */
+    var SPEED = touch ? 1 : 1.95, HOLD = touch ? 0.6 : 0.8 / SPEED;
 
     var layout = function () {
       frameH = stage.clientHeight;
@@ -352,7 +354,9 @@
     };
 
     /* przewinięcie do kroku (i ewentualnie do miejsca w długim kroku) */
+    var progUntil = 0;
     var goTo = function (i, within, smooth) {
+      progUntil = Date.now() + 1500;
       var top = Math.round(startY() + seg[i].start + (within || 0)) + 2;
       w.scrollTo({ top: top, behavior: smooth ? 'smooth' : 'instant' }); /* 'instant', bo CSS ma scroll-behavior: smooth */
     };
@@ -410,6 +414,76 @@
         if (inView) { last = 0; kick(); }
       }).observe(story);
     } else { inView = true; }
+
+    /* Telefon/tablet: jeden gest = najwyżej jeden krok. Wewnątrz opowieści treść idzie za palcem 1:1
+       (bez rozpędu, który przerzucał kilka ekranów naraz), a po puszczeniu dociąga do kroku.
+       Długi krok można czytać swobodnie: między jego początkiem a końcem nic nie dociąga.
+       Na początku i końcu opowieści przewijanie oddajemy przeglądarce. */
+    if (touch) {
+      var rests = function () { /* punkty postoju: [pozycja, krok] */
+        var r = [];
+        seg.forEach(function (sg, k) {
+          r.push([sg.start + sg.edge, k]);
+          if (sg.travel) r.push([sg.start + sg.lead + sg.travel / SPEED, k]);
+        });
+        return r;
+      };
+      var g = null;
+      var near = function (pts, y) {
+        var best = 0;
+        for (var k = 1; k < pts.length; k++) if (Math.abs(pts[k][0] - y) < Math.abs(pts[best][0] - y)) best = k;
+        return best;
+      };
+      /* gest zaczęty pod opowieścią (palcem albo rozpędem) zatrzymuje się na jej ostatnim kroku */
+      var fromBelow = false, prevY = null;
+      var lastRest = function () { var pts = rests(); return pts[pts.length - 1][0]; };
+      w.addEventListener('scroll', function () {
+        if (!seg.length) return;
+        var y = w.pageYOffset - startY(), lastP = lastRest();
+        if (!g && Date.now() > progUntil) {
+          if (prevY !== null && prevY > lastP + 1 && y <= lastP + 1) fromBelow = true;
+          if (fromBelow && y < lastP - 1) { w.scrollTo({ top: Math.round(startY() + lastP), behavior: 'instant' }); y = lastP; }
+        }
+        prevY = y;
+      }, { passive: true });
+      w.addEventListener('touchstart', function () {
+        fromBelow = seg.length > 0 && w.pageYOffset - startY() > lastRest() + 2;
+      }, { passive: true });
+      w.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) { g = null; return; }
+        var y = w.pageYOffset - startY(), pts = rests();
+        if (y < -2 || y > pts[pts.length - 1][0] + 2) { g = null; return; }
+        var from = near(pts, y);
+        g = { y0: e.touches[0].clientY, last: e.touches[0].clientY, s0: y, pts: pts, from: from,
+              lo: pts[Math.max(0, from - 1)][0], hi: pts[Math.min(pts.length - 1, from + 1)][0], free: false };
+      }, { passive: true });
+      w.addEventListener('touchmove', function (e) {
+        if (!g || g.free || e.touches.length !== 1) return;
+        var cy = e.touches[0].clientY, y = g.s0 + (g.y0 - cy);
+        var first = g.pts[0][0], lastP = g.pts[g.pts.length - 1][0];
+        /* wyjście z opowieści w górę lub w dół: dalej zwykłe przewijanie */
+        if ((y < Math.min(0, first) && g.from === 0) || (y > lastP && g.from === g.pts.length - 1)) { g.free = true; return; }
+        e.preventDefault();
+        y = Math.min(g.hi, Math.max(g.from === 0 ? 0 : g.lo, y));
+        w.scrollTo({ top: Math.round(startY() + y), behavior: 'instant' });
+        g.last = cy;
+      }, { passive: false });
+      var end = function () {
+        if (!g || g.free) { g = null; return; }
+        var y = w.pageYOffset - startY(), pts = g.pts, from = g.from, to = from;
+        var moved = g.y0 - g.last;
+        var a = pts[from], nx = pts[Math.min(pts.length - 1, from + 1)], pv = pts[Math.max(0, from - 1)];
+        /* swobodne czytanie w środku długiego kroku */
+        var inside = function (p, q) { return p[1] === q[1] && y > Math.min(p[0], q[0]) + 1 && y < Math.max(p[0], q[0]) - 1; };
+        g = null;
+        if ((moved > 0 && inside(a, nx)) || (moved < 0 && inside(pv, a))) return;
+        if (moved > 40) to = Math.min(pts.length - 1, from + 1);
+        else if (moved < -40) to = Math.max(0, from - 1);
+        w.scrollTo({ top: Math.round(startY() + pts[to][0]), behavior: 'smooth' });
+      };
+      w.addEventListener('touchend', end, { passive: true });
+      w.addEventListener('touchcancel', end, { passive: true });
+    }
 
     var relayout = function () { layout(); build(); onScroll(); };
     var rt = null;
