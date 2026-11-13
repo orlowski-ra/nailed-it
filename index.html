@@ -100,15 +100,42 @@
       </div>
     </section>
 
-    <section id="problem" class="section">
-      <div class="container">
-        <p class="eyebrow">Problem</p>
-        <h2>Brzmi znajomo?</h2>
-        <div class="grid-3">
-          <article class="card"><span class="num">01</span><h3>Wyceny po nocach</h3><p>W dzień robota, wieczorem oferty w Wordzie. Klient czeka trzy dni i w tym czasie dzwoni do konkurencji.</p></article>
-          <article class="card"><span class="num">02</span><h3>To samo wpisywane trzy razy</h3><p>Z maila do Excela, z Excela na fakturę, z faktury do księgowej. Każde przepisanie to czas i okazja do pomyłki.</p></article>
-          <article class="card"><span class="num">03</span><h3>Wszystko na Twojej głowie</h3><p>Kto zapłacił, komu oddzwonić, co jest na jutro: pamiętasz Ty albo nikt.</p></article>
+    <section id="problem" class="story" aria-label="Od problemu do efektu w trzech krokach" style="--n:3">
+      <div class="story-pin">
+        <canvas class="story-canvas" aria-hidden="true"></canvas>
+        <div class="container story-stage">
+          <article class="story-step is-active" id="krok-1">
+            <p class="eyebrow">Problem</p>
+            <h2>Firma rośnie, a&nbsp;papierologia razem z&nbsp;nią.</h2>
+            <p class="story-lead">W dzień robota, wieczorem oferty w&nbsp;Wordzie. To samo wpisywane trzy razy: z&nbsp;maila do Excela, z&nbsp;Excela na fakturę, z&nbsp;faktury do księgowej. A&nbsp;kto zapłacił i&nbsp;komu oddzwonić, pamiętasz Ty albo nikt.</p>
+            <ul class="story-list">
+              <li>Wyceny po nocach</li><li>To samo wpisywane trzy razy</li><li>Wszystko na Twojej głowie</li>
+            </ul>
+          </article>
+          <article class="story-step" id="krok-2">
+            <p class="eyebrow">Automatyzacja</p>
+            <h2>Ustawiam to tak, żeby robiło się samo.</h2>
+            <p class="story-lead">Na programach, które już masz, albo w&nbsp;prostej aplikacji zrobionej pod Ciebie. Zapytanie samo zamienia się w&nbsp;wycenę, faktura sama trafia do księgowej, a&nbsp;przypomnienie przychodzi, zanim minie termin.</p>
+            <ul class="story-list">
+              <li>Diagnoza</li><li>Plan</li><li>Wdrożenie</li><li>Opieka</li>
+            </ul>
+          </article>
+          <article class="story-step" id="krok-3">
+            <p class="eyebrow">Efekt</p>
+            <h2>Wieczory wracają do Ciebie.</h2>
+            <p class="story-lead">Oferta gotowa w&nbsp;minutę, a&nbsp;nie w&nbsp;pół godziny. Nic nie trzeba przepisywać ani pilnować w&nbsp;głowie. Ty tylko zatwierdzasz, a&nbsp;resztę widać w&nbsp;kalendarzu.</p>
+            <p class="story-more"><a href="#przyklady">Zobacz przykłady z&nbsp;szacunkowym efektem <span class="arr" aria-hidden="true">↓</span></a></p>
+          </article>
         </div>
+        <div class="container story-nav">
+          <ol>
+            <li><a href="#krok-1" class="is-active"><span>01</span> Problem</a></li>
+            <li><a href="#krok-2"><span>02</span> Automatyzacja</a></li>
+            <li><a href="#krok-3"><span>03</span> Efekt</a></li>
+          </ol>
+          <span class="story-hint" aria-hidden="true">Przewiń</span>
+        </div>
+        <div class="story-bar" aria-hidden="true"><i></i></div>
       </div>
     </section>
 
@@ -245,7 +272,7 @@
             <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
             <div><label for="f-name">Imię</label><input class="field" id="f-name" name="imie" type="text" autocomplete="given-name" required></div>
             <div><label for="f-email">E-mail</label><input class="field" id="f-email" name="email" type="email" autocomplete="email" required></div>
-            <div><label for="f-tel">Telefon (jeśli wolisz, żebym oddzwonił)</label><input class="field" id="f-tel" name="telefon" type="tel" autocomplete="tel"></div>
+            <div><label for="f-tel">Telefon (opcjonalnie, jeśli wolisz, żebym oddzwonił)</label><input class="field" id="f-tel" name="telefon" type="tel" autocomplete="tel"></div>
             <div><label for="f-msg">Co zabiera Ci najwięcej czasu? (opcjonalnie)</label><textarea class="field" id="f-msg" name="wiadomosc" placeholder="np. przepisywanie zamówień z maila do Excela"></textarea></div>
             <button class="btn" type="submit">Wyślij wiadomość <span class="arr" aria-hidden="true">→</span></button>
             <p class="form-msg" id="form-msg" role="alert"></p>
