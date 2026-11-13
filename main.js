@@ -178,7 +178,9 @@
     var seg = [], total = 1, frameH = 0;
     /* krok → link w menu u góry (Współpraca nie ma własnego) */
     var menuFor = { problem: 'problem', 'krok-2': 'problem', 'krok-3': 'problem', przyklady: 'przyklady', uslugi: 'uslugi', 'o-mnie': 'o-mnie' };
-    var SPEED = 1.5; /* ile pikseli przesuwa się treść na 1 px przewinięcia (Rafał: +50%) */
+    /* Tempo jednakowe dla wszystkich kroków (Rafał: +50%, potem jeszcze +30%):
+       SPEED = ile px przesuwa się treść na 1 px przewinięcia, HOLD = postój kroku jako część wysokości kadru. */
+    var SPEED = 1.95, HOLD = 0.8 / SPEED;
 
     var layout = function () {
       frameH = stage.clientHeight;
@@ -190,7 +192,7 @@
         var h = inner.offsetHeight + (i === 0 ? overlap : 0);
         var travel = Math.max(0, Math.ceil(h + pad * 2 - frameH));
         var top = (travel ? pad : Math.round((frameH - h) / 2)) + (i === 0 ? overlap : 0);
-        var hold = frameH * (i < 4 ? 1 : 0.8) / SPEED;
+        var hold = frameH * HOLD;
         var s = { start: acc, travel: travel, top: top, lead: hold * 0.3, len: travel / SPEED + hold };
         s.edge = Math.min(s.lead, s.len * 0.15); /* na brzegach kroku kropki przechodzą w sąsiedni układ */
         acc += s.len;
