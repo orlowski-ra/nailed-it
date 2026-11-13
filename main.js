@@ -193,6 +193,15 @@
       kick();
     };
 
+    /* klawiatura i czytniki ekranu: fokus w ukrytym kroku przewija do niego */
+    [].forEach.call(stepsEl, function (el, i) {
+      el.addEventListener('focusin', function () {
+        if (i === cur) return;
+        var m = metrics();
+        w.scrollTo(0, Math.round(m.start + m.dist * (i + 0.3) / n));
+      });
+    });
+
     [].forEach.call(navA, function (a, i) {
       a.addEventListener('click', function (e) {
         e.preventDefault();
