@@ -161,6 +161,108 @@
     w.addEventListener('pageshow', function () { busy(false); });
   }
 
+  /* Kropki w tle (wspólne dla opowieści i sekcji pod nią): każdy układ ma swój kształt,
+     a między układami kropki płynnie przechodzą z jednego w drugi.
+     0 fale (start), 1 chaos (problem), 2 płynące linie (automatyzacja), 3 siatka (efekt),
+     4 słupki 16/3/20 h (przykłady), 5 trzy kręgi (usługi), 6 schody 4 kroków (współpraca), 7 tarcza (o mnie) */
+  var makeDots = function (canvas) {
+    var ctx = canvas && canvas.getContext && canvas.getContext('2d');
+    var W = 0, H = 0, dpr = 1, dots = [], N = 108, LANES = 5;
+    var R = { x0: 0, x1: 0, y0: 0, y1: 0 };
+    var seed = 7;
+    var rnd = function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    var narrow = false, cols = 12, rows = 9;
+    var size = function (ww, hh, wide) {
+      if (!ctx) return;
+      dpr = Math.min(w.devicePixelRatio || 1, 2);
+      W = ww; H = hh;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      narrow = !wide && W < 821;
+      cols = narrow ? 9 : 12; rows = narrow ? 12 : 9;
+      R = narrow ? { x0: W * 0.08, x1: W * 0.92, y0: H * 0.12, y1: H * 0.86 } : { x0: W * 0.54, x1: W * 0.93, y0: H * 0.15, y1: H * 0.82 };
+      seed = 7; dots = [];
+      for (var i = 0; i < N; i++) {
+        dots.push({ ax: rnd(), ay: rnd(), ph: rnd() * 6.28, u: rnd(), sp: 0.6 + rnd() * 0.8, lit: rnd() < 0.42 });
+      }
+    };
+    /* słupki i schody: kropki układane kolumnami od dołu */
+    var stack = function (i, counts) {
+      var acc = 0, k = 0;
+      while (k < counts.length - 1 && i >= acc + counts[k]) { acc += counts[k]; k++; }
+      var j = i - acc, perRow = 3, gap = (R.x1 - R.x0) / counts.length;
+      var col = j % perRow, row = Math.floor(j / perRow);
+      var cell = Math.min(gap / 5, (R.y1 - R.y0) / 26);
+      var x = R.x0 + gap * (k + 0.5) + (col - 1) * cell;
+      return [x, R.y1 - row * cell];
+    };
+    var BARS = [44, 8, 56];           /* 16 h, 3 h, 20 h → proporcje 108 kropek */
+    var STAIRS = [11, 22, 32, 43];    /* 4 schodki rosnące */
+    var pos = function (L, i, o, t) {
+      var Rw = R.x1 - R.x0, Rh = R.y1 - R.y0, cxm = (R.x0 + R.x1) / 2, cym = (R.y0 + R.y1) / 2, m = Math.min(Rw, Rh);
+      switch (L) {
+        case 0: { var lane = i % 3, u = Math.floor(i / 3) / (N / 3 - 1);
+          return [R.x0 + u * Rw, cym + (lane - 1) * Rh * 0.12 + Math.sin(u * 9.4 + t * 0.0009 + lane * 0.7) * Rh * 0.12]; }
+        case 1: return [o.ax * W + Math.sin(t * 0.0005 + o.ph) * 18, o.ay * H + Math.cos(t * 0.0004 + o.ph * 1.3) * 18];
+        case 2: { var lx0 = narrow ? 0 : W * 0.45, fx = (o.u + t * 0.00005 * o.sp) % 1;
+          return [lx0 + fx * (W - lx0), H * (0.2 + 0.6 * (i % LANES) / (LANES - 1))]; }
+        case 3: { var c = i % cols, r = Math.floor(i / cols);
+          return [R.x0 + Rw * c / (cols - 1), R.y0 + Rh * r / (rows - 1)]; }
+        case 4: return stack(i, BARS);
+        case 5: { var k = i % 3, a = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.00025 * (k % 2 ? -1 : 1);
+          var cx = R.x0 + Rw * (0.2 + 0.3 * k), cy = R.y0 + Rh * (narrow ? 0.25 + 0.25 * k : 0.3 + 0.2 * k), rr = m * (narrow ? 0.16 : 0.17);
+          return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; }
+        case 6: return stack(i, STAIRS);
+        default: { var ring = i % 3, b = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.0002 * (ring + 1);
+          var rr2 = m * (0.13 + ring * 0.13);
+          return [cxm + Math.cos(b) * rr2, cym + Math.sin(b) * rr2]; }
+      }
+    };
+    /* wygląd kropki w danym układzie: [przezroczystość, czy limonkowa (0–1), promień] */
+    var look = function (L, i, o, t) {
+      switch (L) {
+        case 0: return i % 3 === 0 ? [0.8, 1, 1.6] : [0.35, 0, 1.3];
+        case 1: return [0.5, 0, 1.3];
+        case 2: { var fx = (o.u + t * 0.00005 * o.sp) % 1, edge = Math.min(1, fx * 8, (1 - fx) * 8);
+          return [0.85 * (0.4 + 0.6 * edge), 1, 1.7]; }
+        case 3: return o.lit ? [0.95, 1, 2.4] : [0.22, 0, 1.5];
+        case 4: return [0.8, 1, 2];
+        case 5: return i % 3 === 1 ? [0.9, 1, 1.8] : [0.5, 0, 1.6];
+        case 6: return [0.85, 1, 1.9];
+        default: return i % 3 === 0 ? [0.9, 1, 1.9] : [0.4, 0, 1.5];
+      }
+    };
+    var ease = function (x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+    /* rysuje przejście z układu A do B; f = postęp 0–1 */
+    var render = function (t, A, B, f) {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, W, H);
+      f = ease(Math.min(1, Math.max(0, f)));
+      /* linie pod układem 2 */
+      var laneA = (A === 2 ? 1 - f : 0) + (B === 2 && A !== 2 ? f : 0);
+      if (laneA > 0.01) {
+        var lx0 = narrow ? 0 : W * 0.45;
+        ctx.lineWidth = 1;
+        for (var l = 0; l < LANES; l++) {
+          var ly = H * (0.2 + 0.6 * l / (LANES - 1));
+          var g = ctx.createLinearGradient(lx0, 0, W, 0);
+          g.addColorStop(0, 'rgba(200,255,61,0)'); g.addColorStop(1, 'rgba(200,255,61,' + (0.22 * laneA) + ')');
+          ctx.strokeStyle = g; ctx.beginPath(); ctx.moveTo(lx0, ly); ctx.lineTo(W, ly); ctx.stroke();
+        }
+      }
+      for (var i = 0; i < dots.length; i++) {
+        var o = dots[i];
+        var p1 = pos(A, i, o, t), p2 = A === B ? p1 : pos(B, i, o, t);
+        var s1 = look(A, i, o, t), s2 = A === B ? s1 : look(B, i, o, t);
+        var x = p1[0] + (p2[0] - p1[0]) * f, y = p1[1] + (p2[1] - p1[1]) * f;
+        var a = s1[0] + (s2[0] - s1[0]) * f, lime = s1[1] + (s2[1] - s1[1]) * f, rad = s1[2] + (s2[2] - s1[2]) * f;
+        ctx.fillStyle = lime > 0.5 ? 'rgba(200,255,61,' + a.toFixed(3) + ')' : 'rgba(255,255,255,' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.2832); ctx.fill();
+      }
+    };
+    return { size: size, render: render, ok: !!ctx };
+  };
+
   /* 6. Opowieść: kadr przypięty na czas przewijania, kroki przechodzą płynnie jeden w drugi.
         Krok dłuższy niż ekran przesuwa się w kadrze razem z przewijaniem, a dopiero potem ustępuje następnemu.
         W tle kropki: chaos (problem) → płynące linie (automatyzacja) → równa siatka (efekt i dalej).
@@ -172,8 +274,7 @@
     var inners = stepsEl.map(function (el) { return el.querySelector('.story-inner'); });
     var navA = story.querySelectorAll('.story-nav a');
     var bar = story.querySelector('.story-bar i');
-    var canvas = story.querySelector('.story-canvas');
-    var ctx = canvas && canvas.getContext && canvas.getContext('2d');
+    var field = makeDots(story.querySelector('.story-canvas'));
     var n = stepsEl.length, cur = -1, morph = 0, morphTo = 0, inView = false, raf = 0, last = 0;
     var seg = [], total = 1, frameH = 0;
     /* krok → link w menu u góry (Współpraca nie ma własnego) */
@@ -291,106 +392,17 @@
       goTo(i, within, false);
     };
 
-    /* kropki w tle: każdy krok ma własny układ, a między krokami kropki płynnie przechodzą z jednego w drugi.
-       0 fale (start), 1 chaos (problem), 2 płynące linie (automatyzacja), 3 siatka (efekt),
-       4 słupki 16/3/20 h (przykłady), 5 trzy kręgi (usługi), 6 schody 4 kroków (współpraca), 7 tarcza (o mnie) */
-    var W = 0, H = 0, dpr = 1, dots = [], N = 108, LANES = 5;
-    var R = { x0: 0, x1: 0, y0: 0, y1: 0 };
-    var seed = 7;
-    var rnd = function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
-    var narrow = false, cols = 12, rows = 9;
-    var build = function () {
-      if (!ctx) return;
-      dpr = Math.min(w.devicePixelRatio || 1, 2);
-      W = pin.clientWidth; H = pin.clientHeight;
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      narrow = W < 821;
-      cols = narrow ? 9 : 12; rows = narrow ? 12 : 9;
-      R = narrow ? { x0: W * 0.08, x1: W * 0.92, y0: H * 0.12, y1: H * 0.86 } : { x0: W * 0.54, x1: W * 0.93, y0: H * 0.15, y1: H * 0.82 };
-      seed = 7; dots = [];
-      for (var i = 0; i < N; i++) {
-        dots.push({ ax: rnd(), ay: rnd(), ph: rnd() * 6.28, u: rnd(), sp: 0.6 + rnd() * 0.8, lit: rnd() < 0.42 });
-      }
-    };
-    /* słupki i schody: kropki układane kolumnami od dołu */
-    var stack = function (i, counts) {
-      var acc = 0, k = 0;
-      while (k < counts.length - 1 && i >= acc + counts[k]) { acc += counts[k]; k++; }
-      var j = i - acc, perRow = 3, gap = (R.x1 - R.x0) / counts.length;
-      var col = j % perRow, row = Math.floor(j / perRow);
-      var cell = Math.min(gap / 5, (R.y1 - R.y0) / 26);
-      var x = R.x0 + gap * (k + 0.5) + (col - 1) * cell;
-      return [x, R.y1 - row * cell];
-    };
-    var BARS = [44, 8, 56];           /* 16 h, 3 h, 20 h → proporcje 108 kropek */
-    var STAIRS = [11, 22, 32, 43];    /* 4 schodki rosnące */
-    var pos = function (L, i, o, t) {
-      var Rw = R.x1 - R.x0, Rh = R.y1 - R.y0, cxm = (R.x0 + R.x1) / 2, cym = (R.y0 + R.y1) / 2, m = Math.min(Rw, Rh);
-      switch (L) {
-        case 0: { var lane = i % 3, u = Math.floor(i / 3) / (N / 3 - 1);
-          return [R.x0 + u * Rw, cym + (lane - 1) * Rh * 0.12 + Math.sin(u * 9.4 + t * 0.0009 + lane * 0.7) * Rh * 0.12]; }
-        case 1: return [o.ax * W + Math.sin(t * 0.0005 + o.ph) * 18, o.ay * H + Math.cos(t * 0.0004 + o.ph * 1.3) * 18];
-        case 2: { var lx0 = narrow ? 0 : W * 0.45, fx = (o.u + t * 0.00005 * o.sp) % 1;
-          return [lx0 + fx * (W - lx0), H * (0.2 + 0.6 * (i % LANES) / (LANES - 1))]; }
-        case 3: { var c = i % cols, r = Math.floor(i / cols);
-          return [R.x0 + Rw * c / (cols - 1), R.y0 + Rh * r / (rows - 1)]; }
-        case 4: return stack(i, BARS);
-        case 5: { var k = i % 3, a = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.00025 * (k % 2 ? -1 : 1);
-          var cx = R.x0 + Rw * (0.2 + 0.3 * k), cy = R.y0 + Rh * (narrow ? 0.25 + 0.25 * k : 0.3 + 0.2 * k), rr = m * (narrow ? 0.16 : 0.17);
-          return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; }
-        case 6: return stack(i, STAIRS);
-        default: { var ring = i % 3, b = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.0002 * (ring + 1);
-          var rr2 = m * (0.13 + ring * 0.13);
-          return [cxm + Math.cos(b) * rr2, cym + Math.sin(b) * rr2]; }
-      }
-    };
-    /* wygląd kropki w danym układzie: [przezroczystość, czy limonkowa (0–1), promień] */
-    var look = function (L, i, o, t) {
-      switch (L) {
-        case 0: return i % 3 === 0 ? [0.8, 1, 1.6] : [0.35, 0, 1.3];
-        case 1: return [0.5, 0, 1.3];
-        case 2: { var fx = (o.u + t * 0.00005 * o.sp) % 1, edge = Math.min(1, fx * 8, (1 - fx) * 8);
-          return [0.85 * (0.4 + 0.6 * edge), 1, 1.7]; }
-        case 3: return o.lit ? [0.95, 1, 2.4] : [0.22, 0, 1.5];
-        case 4: return [0.8, 1, 2];
-        case 5: return i % 3 === 1 ? [0.9, 1, 1.8] : [0.5, 0, 1.6];
-        case 6: return [0.85, 1, 1.9];
-        default: return i % 3 === 0 ? [0.9, 1, 1.9] : [0.4, 0, 1.5];
-      }
-    };
-    var ease = function (x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
     var draw = function (t) {
       raf = 0;
-      if (!ctx || !inView) return;
+      if (!inView) return;
       var dt = last ? Math.min(t - last, 50) : 16; last = t;
       morph += (morphTo - morph) * Math.min(1, dt / 160);
-      ctx.clearRect(0, 0, W, H);
-      var A = Math.floor(morph), B = Math.min(n - 1, A + 1), f = ease(morph - A);
-      /* linie pod układem 2 */
-      var laneA = (A === 2 ? 1 - f : 0) + (B === 2 && A !== 2 ? f : 0);
-      if (laneA > 0.01) {
-        var lx0 = narrow ? 0 : W * 0.45;
-        ctx.lineWidth = 1;
-        for (var l = 0; l < LANES; l++) {
-          var ly = H * (0.2 + 0.6 * l / (LANES - 1));
-          var g = ctx.createLinearGradient(lx0, 0, W, 0);
-          g.addColorStop(0, 'rgba(200,255,61,0)'); g.addColorStop(1, 'rgba(200,255,61,' + (0.22 * laneA) + ')');
-          ctx.strokeStyle = g; ctx.beginPath(); ctx.moveTo(lx0, ly); ctx.lineTo(W, ly); ctx.stroke();
-        }
-      }
-      for (var i = 0; i < dots.length; i++) {
-        var o = dots[i];
-        var p1 = pos(A, i, o, t), p2 = A === B ? p1 : pos(B, i, o, t);
-        var s1 = look(A, i, o, t), s2 = A === B ? s1 : look(B, i, o, t);
-        var x = p1[0] + (p2[0] - p1[0]) * f, y = p1[1] + (p2[1] - p1[1]) * f;
-        var a = s1[0] + (s2[0] - s1[0]) * f, lime = s1[1] + (s2[1] - s1[1]) * f, rad = s1[2] + (s2[2] - s1[2]) * f;
-        ctx.fillStyle = lime > 0.5 ? 'rgba(200,255,61,' + a.toFixed(3) + ')' : 'rgba(255,255,255,' + a.toFixed(3) + ')';
-        ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.2832); ctx.fill();
-      }
+      var A = Math.floor(morph);
+      field.render(t, A, Math.min(n - 1, A + 1), morph - A);
       kick();
     };
-    var kick = function () { if (!raf && inView && ctx) raf = w.requestAnimationFrame(draw); };
+    var build = function () { field.size(pin.clientWidth, pin.clientHeight); };
+    var kick = function () { if (!raf && inView && field.ok) raf = w.requestAnimationFrame(draw); };
 
     if (hasIO) {
       new IntersectionObserver(function (entries) {
@@ -419,5 +431,38 @@
     };
     setTimeout(fromHash, 0);
     w.addEventListener('hashchange', fromHash);
+  }
+  /* 7. Sekcje pod opowieścią: kropki w tle w tym samym stylu. Przy wjeździe sekcji w ekran
+        rozsypane kropki układają się w kształt sekcji (słupki, kręgi, schody, tarcza).
+        Na telefonie bez kropek (tekst ma pierwszeństwo), przy ograniczonym ruchu od razu gotowy kształt. */
+  var secCanvases = d.querySelectorAll('.sec-dots');
+  if (secCanvases.length && w.requestAnimationFrame && w.matchMedia('(min-width: 821px)').matches) {
+    [].forEach.call(secCanvases, function (c) {
+      var host = c.parentElement, L = +c.getAttribute('data-layout') || 3;
+      var f = makeDots(c);
+      if (!f.ok) return;
+      var t0 = null, vis = false, raf2 = 0;
+      var size = function () { f.size(host.clientWidth, host.clientHeight, true); };
+      var frame = function (t) {
+        raf2 = 0;
+        if (reduce) { f.render(t, L, L, 1); return; }
+        if (!vis) return;
+        if (t0 === null) t0 = t;
+        f.render(t, 1, L, (t - t0) / 1400);
+        raf2 = w.requestAnimationFrame(frame);
+      };
+      size();
+      if (hasIO) {
+        new IntersectionObserver(function (es) {
+          vis = es[0].isIntersecting;
+          if (vis && !raf2) raf2 = w.requestAnimationFrame(frame);
+        }, { threshold: 0.2 }).observe(host);
+      } else { vis = true; raf2 = w.requestAnimationFrame(frame); }
+      var rt2 = null;
+      w.addEventListener('resize', function () {
+        clearTimeout(rt2);
+        rt2 = setTimeout(function () { size(); if (reduce || !vis) w.requestAnimationFrame(function (t) { f.render(t, L, L, 1); }); }, 150);
+      });
+    });
   }
 })();
