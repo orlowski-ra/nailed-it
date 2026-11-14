@@ -15,7 +15,7 @@
   if (hasIO && !reduce) {
     var sel = [
       '.section .eyebrow', '.section h2', '.cta .lead', '.note',
-      '.card', '.case', '.cases-cta', '.service', '.price-note', '.tools', '.steps li', '.about-text', '.form-wrap'
+      '.card', '.case', '.cases-cta', '.service', '.price-note', '.tools', '.steps li', '.about-text', '.form-wrap', '.contact-intro', '.section-cta'
     ];
     var stagger = '.card,.case,.service,.steps li';
     var vh = w.innerHeight;
