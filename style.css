@@ -227,6 +227,8 @@ html:not(.js) .flow-foot b{color:var(--accent)}
 .story.is-moved .story-hint{opacity:0}
 .story.is-live .story-bar{display:block;position:relative;z-index:1;height:2px;background:var(--line)}
 .story-bar i{position:absolute;inset:0;background:linear-gradient(90deg,rgba(200,255,61,.25),var(--accent));transform:scaleX(0);transform-origin:left;will-change:transform}
+/* deck (ekrany dotykowe): gest na kadrze obsługuje main.js, przeglądarka tylko powiększa */
+.story.is-deck .story-pin{touch-action:pinch-zoom;overscroll-behavior:contain}
 /* węższe ekrany: przy nieaktywnych krokach same numery */
 @media (max-width:1240px){
   .story-nav ol{gap:0 14px}

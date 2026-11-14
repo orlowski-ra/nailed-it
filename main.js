@@ -281,9 +281,12 @@
     var menuFor = { problem: 'problem', 'krok-2': 'problem', 'krok-3': 'problem', przyklady: 'przyklady', uslugi: 'uslugi', 'o-mnie': 'o-mnie' };
     /* Tempo jednakowe dla wszystkich kroków (Rafał: +50%, potem jeszcze +30%):
        SPEED = ile px przesuwa się treść na 1 px przewinięcia, HOLD = postój kroku jako część wysokości kadru. */
-    var touch = w.matchMedia && w.matchMedia('(pointer: coarse)').matches;
-    /* Na dotyku treść idzie za palcem 1:1, a krokami steruje gest (niżej), więc inne stałe. */
-    var SPEED = touch ? 1 : 1.95, HOLD = touch ? 0.6 : 0.8 / SPEED;
+    var SPEED = 1.95, HOLD = 0.8 / SPEED;
+    /* Ekrany dotykowe: opowieść to jeden ekran (bez długiego pasa przewijania), a kroki zmienia gest palcem.
+       Dzięki temu rozpęd przewijania na iOS/Androidzie nie ma przez co „przelecieć”. Szczegóły niżej (deck). */
+    var deck = !!(w.matchMedia && w.matchMedia('(pointer: coarse)').matches);
+    if (deck) story.classList.add('is-deck');
+    var off = 0; /* deck: przesunięcie treści długiego kroku (px) */
 
     var layout = function () {
       frameH = stage.clientHeight;
@@ -292,9 +295,10 @@
       var hdr = d.querySelector('.site-header');
       var overlap = hdr ? Math.max(0, hdr.offsetHeight - (parseFloat(getComputedStyle(pin).top) || 0)) : 0;
       seg = inners.map(function (inner, i) {
-        var h = inner.offsetHeight + (i === 0 ? overlap : 0);
+        var ov = (i === 0 || deck) ? overlap : 0; /* w deck strona się nie przesuwa, więc pasek menu zostaje */
+        var h = inner.offsetHeight + ov;
         var travel = Math.max(0, Math.ceil(h + pad * 2 - frameH));
-        var top = (travel ? pad : Math.round((frameH - h) / 2)) + (i === 0 ? overlap : 0);
+        var top = (travel ? pad : Math.round((frameH - h) / 2)) + ov;
         var hold = frameH * HOLD;
         var s = { start: acc, travel: travel, top: top, lead: hold * 0.3, len: travel / SPEED + hold };
         s.edge = Math.min(s.lead, s.len * 0.15); /* na brzegach kroku kropki przechodzą w sąsiedni układ */
@@ -302,7 +306,7 @@
         return s;
       });
       total = acc;
-      story.style.height = Math.round(pin.offsetHeight + total) + 'px';
+      story.style.height = Math.round(pin.offsetHeight + (deck ? 0 : total)) + 'px';
     };
     var startY = function () {
       var top = parseFloat(getComputedStyle(pin).top) || 0;
@@ -338,7 +342,21 @@
     };
     story.addEventListener('navsync', syncMenu);
 
+    var placeOff = function (i, o) {
+      inners[i].style.transform = 'translate3d(0,' + (seg[i].top - o).toFixed(1) + 'px,0)';
+    };
+    /* deck: pokaż krok i (o = przesunięcie długiej treści) */
+    var show = function (i, o) {
+      i = Math.max(0, Math.min(n - 1, i));
+      off = Math.max(0, Math.min(seg[i].travel, o || 0));
+      for (var k = 0; k < n; k++) placeOff(k, k === i ? off : (k < i ? seg[k].travel : 0));
+      setStep(i);
+      morphTo = i;
+      if (bar) bar.style.transform = 'scaleX(' + ((i + (seg[i].travel ? off / seg[i].travel : 1)) / n).toFixed(4) + ')';
+      kick();
+    };
     var onScroll = function () {
+      if (deck) { syncMenu(); kick(); return; }
       var y = Math.min(total, Math.max(0, w.pageYOffset - startY()));
       var i = 0;
       while (i < n - 1 && y >= seg[i + 1].start) i++;
@@ -357,6 +375,11 @@
     var progUntil = 0;
     var goTo = function (i, within, smooth) {
       progUntil = Date.now() + 1500;
+      if (deck) {
+        show(i, within && seg[i].travel ? (within - seg[i].lead) * SPEED : 0);
+        if (Math.abs(w.pageYOffset - startY()) > 1) w.scrollTo({ top: Math.round(startY()), behavior: smooth ? 'smooth' : 'instant' });
+        return;
+      }
       var top = Math.round(startY() + seg[i].start + (within || 0)) + 2;
       w.scrollTo({ top: top, behavior: smooth ? 'smooth' : 'instant' }); /* 'instant', bo CSS ma scroll-behavior: smooth */
     };
@@ -415,77 +438,71 @@
       }).observe(story);
     } else { inView = true; }
 
-    /* Telefon/tablet: jeden gest = najwyżej jeden krok. Wewnątrz opowieści treść idzie za palcem 1:1
-       (bez rozpędu, który przerzucał kilka ekranów naraz), a po puszczeniu dociąga do kroku.
-       Długi krok można czytać swobodnie: między jego początkiem a końcem nic nie dociąga.
-       Na początku i końcu opowieści przewijanie oddajemy przeglądarce. */
-    if (touch) {
-      var rests = function () { /* punkty postoju: [pozycja, krok] */
-        var r = [];
-        seg.forEach(function (sg, k) {
-          r.push([sg.start + sg.edge, k]);
-          if (sg.travel) r.push([sg.start + sg.lead + sg.travel / SPEED, k]);
-        });
-        return r;
-      };
-      var g = null;
-      var near = function (pts, y) {
-        var best = 0;
-        for (var k = 1; k < pts.length; k++) if (Math.abs(pts[k][0] - y) < Math.abs(pts[best][0] - y)) best = k;
-        return best;
-      };
-      /* gest zaczęty pod opowieścią (palcem albo rozpędem) zatrzymuje się na jej ostatnim kroku */
-      var fromBelow = false, prevY = null;
-      var lastRest = function () { var pts = rests(); return pts[pts.length - 1][0]; };
-      w.addEventListener('scroll', function () {
-        if (!seg.length) return;
-        var y = w.pageYOffset - startY(), lastP = lastRest();
-        if (!g && Date.now() > progUntil) {
-          if (prevY !== null && prevY > lastP + 1 && y <= lastP + 1) fromBelow = true;
-          if (fromBelow && y < lastP - 1) { w.scrollTo({ top: Math.round(startY() + lastP), behavior: 'instant' }); y = lastP; }
+    /* Deck (telefon/tablet): gest zaczęty na opowieści obsługujemy sami, bez przewijania strony.
+       - długi krok: treść idzie za palcem 1:1, bez rozpędu;
+       - przeciągnięcie poza koniec treści (min. 50 px albo szybkie machnięcie) = następny / poprzedni krok,
+         nigdy więcej niż jeden krok na gest;
+       - ostatni krok + gest w górę = przewinięcie strony do sekcji pod opowieścią;
+       - gdy opowieść jest tylko częściowo na ekranie, gest dociąga ją do góry albo przewija za nią.
+       CSS ustawia na kadrze touch-action: pinch-zoom, więc przeglądarka sama go nie przewija (powiększanie działa). */
+    if (deck) {
+      var tg = null;
+      var aligned = function () { return Math.abs(w.pageYOffset - startY()) <= 2; };
+      pin.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) { tg = null; return; }
+        tg = { y0: e.touches[0].clientY, y: e.touches[0].clientY, t0: Date.now(), off0: off, s0: w.pageYOffset, al: aligned() };
+      }, { passive: true });
+      pin.addEventListener('touchmove', function (e) {
+        if (!tg || e.touches.length !== 1) return;
+        if (e.cancelable) e.preventDefault();
+        var ny = e.touches[0].clientY, now = Date.now();
+        tg.v = tg.lt ? (tg.y - ny) / Math.max(1, now - tg.lt) : 0; /* px/ms, do wybiegu */
+        tg.lt = now; tg.y = ny;
+        var dy = tg.y0 - tg.y;
+        if (tg.al) {
+          if (seg[cur].travel) show(cur, tg.off0 + dy);
+        } else {
+          /* opowieść częściowo na ekranie: strona idzie za palcem, ale nie dalej niż do jej początku/końca */
+          var top = startY(), endY = top + pin.offsetHeight;
+          w.scrollTo({ top: Math.round(Math.max(top, Math.min(endY, tg.s0 + dy))), behavior: 'instant' });
         }
-        prevY = y;
-      }, { passive: true });
-      w.addEventListener('touchstart', function () {
-        fromBelow = seg.length > 0 && w.pageYOffset - startY() > lastRest() + 2;
-      }, { passive: true });
-      w.addEventListener('touchstart', function (e) {
-        if (e.touches.length !== 1) { g = null; return; }
-        var y = w.pageYOffset - startY(), pts = rests();
-        if (y < -2 || y > pts[pts.length - 1][0] + 2) { g = null; return; }
-        var from = near(pts, y);
-        g = { y0: e.touches[0].clientY, last: e.touches[0].clientY, s0: y, pts: pts, from: from,
-              lo: pts[Math.max(0, from - 1)][0], hi: pts[Math.min(pts.length - 1, from + 1)][0], free: false };
-      }, { passive: true });
-      w.addEventListener('touchmove', function (e) {
-        if (!g || g.free || e.touches.length !== 1) return;
-        var cy = e.touches[0].clientY, y = g.s0 + (g.y0 - cy);
-        var first = g.pts[0][0], lastP = g.pts[g.pts.length - 1][0];
-        /* wyjście z opowieści w górę lub w dół: dalej zwykłe przewijanie */
-        if ((y < Math.min(0, first) && g.from === 0) || (y > lastP && g.from === g.pts.length - 1)) { g.free = true; return; }
-        e.preventDefault();
-        y = Math.min(g.hi, Math.max(g.from === 0 ? 0 : g.lo, y));
-        w.scrollTo({ top: Math.round(startY() + y), behavior: 'instant' });
-        g.last = cy;
       }, { passive: false });
-      var end = function () {
-        if (!g || g.free) { g = null; return; }
-        var y = w.pageYOffset - startY(), pts = g.pts, from = g.from, to = from;
-        var moved = g.y0 - g.last;
-        var a = pts[from], nx = pts[Math.min(pts.length - 1, from + 1)], pv = pts[Math.max(0, from - 1)];
-        /* swobodne czytanie w środku długiego kroku */
-        var inside = function (p, q) { return p[1] === q[1] && y > Math.min(p[0], q[0]) + 1 && y < Math.max(p[0], q[0]) - 1; };
-        g = null;
-        if ((moved > 0 && inside(a, nx)) || (moved < 0 && inside(pv, a))) return;
-        if (moved > 40) to = Math.min(pts.length - 1, from + 1);
-        else if (moved < -40) to = Math.max(0, from - 1);
-        w.scrollTo({ top: Math.round(startY() + pts[to][0]), behavior: 'smooth' });
+      var tend = function () {
+        if (!tg) return;
+        var g = tg; tg = null;
+        var dy = g.y0 - g.y, dt = Math.max(1, Date.now() - g.t0);
+        var fling = Math.abs(dy) > 20 && Math.abs(dy) / dt > 0.45;
+        var top = startY(), endY = top + pin.offsetHeight;
+        if (!g.al) {
+          if (dy > 30 || (fling && dy > 0)) w.scrollTo({ top: Math.round(endY), behavior: 'smooth' });
+          else w.scrollTo({ top: Math.round(top), behavior: 'smooth' });
+          return;
+        }
+        var tr = seg[cur].travel;
+        var over = dy > 0 ? (g.off0 + dy) - tr : g.off0 + dy; /* ile przeciągnięto poza koniec / początek treści */
+        var atEnd = g.off0 >= tr - 1, atStart = g.off0 <= 1;
+        if (dy > 0 && ((over > 50) || (fling && atEnd))) {
+          if (cur < n - 1) show(cur + 1, 0);
+          else w.scrollTo({ top: Math.round(endY), behavior: 'smooth' });
+        } else if (dy < 0 && ((over < -50) || (fling && atStart))) {
+          if (cur > 0) show(cur - 1, seg[cur - 1].travel);
+        } else if (tr && g.v) {
+          /* krótki wybieg długiej treści po puszczeniu (zatrzymuje się na jej brzegu, nie zmienia kroku) */
+          var v = g.v, i0 = cur, lt = null;
+          w.requestAnimationFrame(function glide(t) {
+            if (tg || cur !== i0) return;
+            var ft = lt === null ? 16 : Math.min(32, t - lt); lt = t;
+            show(cur, off + v * ft);
+            v *= Math.pow(0.94, ft / 16);
+            if (Math.abs(v) > 0.03 && off > 0 && off < seg[cur].travel) w.requestAnimationFrame(glide);
+          });
+        }
       };
-      w.addEventListener('touchend', end, { passive: true });
-      w.addEventListener('touchcancel', end, { passive: true });
+      pin.addEventListener('touchend', tend, { passive: true });
+      pin.addEventListener('touchcancel', function () { tg = null; }, { passive: true });
     }
 
-    var relayout = function () { layout(); build(); onScroll(); };
+    var relayout = function () { layout(); build(); if (deck) show(cur < 0 ? 0 : cur, off); onScroll(); };
     var rt = null;
     w.addEventListener('resize', function () {
       clearTimeout(rt);
