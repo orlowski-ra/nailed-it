@@ -196,7 +196,7 @@
       var x = R.x0 + gap * (k + 0.5) + (col - 1) * cell;
       /* kształt stoi, ale kropki w nim lekko falują: fala idzie od dołu do góry i z kolumny do kolumny */
       var wv = t * 0.0018 - row * 0.45 - k * 1.1;
-      return [x + Math.sin(wv * 0.7 + col) * cell * 0.12, R.y1 - row * cell + Math.sin(wv) * cell * 0.28];
+      return [x + Math.sin(wv * 0.7 + col) * cell * 0.12, R.y1 - row * cell + Math.sin(wv) * cell * 0.45];
     };
     /* jasny błysk wędrujący po kolumnach od dołu do góry (0–1) */
     var pulse = function (i, counts, t) {
@@ -215,8 +215,9 @@
         case 1: return [o.ax * W + Math.sin(t * 0.0005 + o.ph) * 18, o.ay * H + Math.cos(t * 0.0004 + o.ph * 1.3) * 18];
         case 2: { var lx0 = narrow ? 0 : W * 0.45, fx = (o.u + t * 0.00005 * o.sp) % 1;
           return [lx0 + fx * (W - lx0), H * (0.2 + 0.6 * (i % LANES) / (LANES - 1))]; }
-        case 3: { var c = i % cols, r = Math.floor(i / cols);
-          return [R.x0 + Rw * c / (cols - 1), R.y0 + Rh * r / (rows - 1)]; }
+        case 3: { var c = i % cols, r = Math.floor(i / cols), gy = Rh / (rows - 1), gw = t * 0.0016 - c * 0.55 - r * 0.35;
+          /* siatka stoi w miejscu, ale przez nią przepływa fala: kropki lekko się kołyszą */
+          return [R.x0 + Rw * c / (cols - 1) + Math.cos(gw * 0.8) * gy * 0.08, R.y0 + gy * r + Math.sin(gw) * gy * 0.16]; }
         case 4: return stack(i, BARS, t);
         case 5: { var k = i % 3, a = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.00025 * (k % 2 ? -1 : 1);
           var cx = R.x0 + Rw * (0.2 + 0.3 * k), cy = R.y0 + Rh * (narrow ? 0.25 + 0.25 * k : 0.3 + 0.2 * k), rr = m * (narrow ? 0.16 : 0.17);
@@ -234,7 +235,11 @@
         case 1: return [0.5, 0, 1.3];
         case 2: { var fx = (o.u + t * 0.00005 * o.sp) % 1, edge = Math.min(1, fx * 8, (1 - fx) * 8);
           return [0.85 * (0.4 + 0.6 * edge), 1, 1.7]; }
-        case 3: return o.lit ? [0.95, 1, 2.4] : [0.22, 0, 1.5];
+        case 3: { var gc = i % cols, gr = Math.floor(i / cols);
+          /* po siatce po skosie przechodzi limonkowy błysk, a zapalone kropki pulsują */
+          var sw = Math.pow(0.5 + 0.5 * Math.sin(t * 0.0021 - (gc + gr) * 0.55), 6);
+          return o.lit ? [0.6 + 0.35 * (0.5 + 0.5 * Math.sin(t * 0.003 + o.ph)), 1, 2.1 + 0.5 * sw]
+                       : [0.22 + 0.6 * sw, sw > 0.45 ? 1 : 0, 1.5 + 0.6 * sw]; }
         case 4: return [0.55 + 0.35 * pulse(i, BARS, t), 1, 2];
         case 5: return i % 3 === 1 ? [0.9, 1, 1.8] : [0.5, 0, 1.6];
         case 6: return [0.55 + 0.4 * pulse(i, STAIRS, t), 1, 1.9];
