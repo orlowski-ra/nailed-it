@@ -187,14 +187,23 @@
       }
     };
     /* słupki i schody: kropki układane kolumnami od dołu */
-    var stack = function (i, counts) {
+    var stack = function (i, counts, t) {
       var acc = 0, k = 0;
       while (k < counts.length - 1 && i >= acc + counts[k]) { acc += counts[k]; k++; }
       var j = i - acc, perRow = 3, gap = (R.x1 - R.x0) / counts.length;
       var col = j % perRow, row = Math.floor(j / perRow);
       var cell = Math.min(gap / 5, (R.y1 - R.y0) / 26);
       var x = R.x0 + gap * (k + 0.5) + (col - 1) * cell;
-      return [x, R.y1 - row * cell];
+      /* kształt stoi, ale kropki w nim lekko falują: fala idzie od dołu do góry i z kolumny do kolumny */
+      var wv = t * 0.0018 - row * 0.45 - k * 1.1;
+      return [x + Math.sin(wv * 0.7 + col) * cell * 0.12, R.y1 - row * cell + Math.sin(wv) * cell * 0.28];
+    };
+    /* jasny błysk wędrujący po kolumnach od dołu do góry (0–1) */
+    var pulse = function (i, counts, t) {
+      var acc = 0, k = 0;
+      while (k < counts.length - 1 && i >= acc + counts[k]) { acc += counts[k]; k++; }
+      var row = Math.floor((i - acc) / 3);
+      return Math.pow(0.5 + 0.5 * Math.sin(t * 0.0022 - row * 0.5 - k * 1.3), 3);
     };
     var BARS = [44, 8, 56];           /* 16 h, 3 h, 20 h → proporcje 108 kropek */
     var STAIRS = [11, 22, 32, 43];    /* 4 schodki rosnące */
@@ -208,11 +217,11 @@
           return [lx0 + fx * (W - lx0), H * (0.2 + 0.6 * (i % LANES) / (LANES - 1))]; }
         case 3: { var c = i % cols, r = Math.floor(i / cols);
           return [R.x0 + Rw * c / (cols - 1), R.y0 + Rh * r / (rows - 1)]; }
-        case 4: return stack(i, BARS);
+        case 4: return stack(i, BARS, t);
         case 5: { var k = i % 3, a = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.00025 * (k % 2 ? -1 : 1);
           var cx = R.x0 + Rw * (0.2 + 0.3 * k), cy = R.y0 + Rh * (narrow ? 0.25 + 0.25 * k : 0.3 + 0.2 * k), rr = m * (narrow ? 0.16 : 0.17);
           return [cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]; }
-        case 6: return stack(i, STAIRS);
+        case 6: return stack(i, STAIRS, t);
         default: { var ring = i % 3, b = Math.floor(i / 3) / (N / 3) * 6.2832 + t * 0.0002 * (ring + 1);
           var rr2 = m * (0.13 + ring * 0.13);
           return [cxm + Math.cos(b) * rr2, cym + Math.sin(b) * rr2]; }
@@ -226,9 +235,9 @@
         case 2: { var fx = (o.u + t * 0.00005 * o.sp) % 1, edge = Math.min(1, fx * 8, (1 - fx) * 8);
           return [0.85 * (0.4 + 0.6 * edge), 1, 1.7]; }
         case 3: return o.lit ? [0.95, 1, 2.4] : [0.22, 0, 1.5];
-        case 4: return [0.8, 1, 2];
+        case 4: return [0.55 + 0.35 * pulse(i, BARS, t), 1, 2];
         case 5: return i % 3 === 1 ? [0.9, 1, 1.8] : [0.5, 0, 1.6];
-        case 6: return [0.85, 1, 1.9];
+        case 6: return [0.55 + 0.4 * pulse(i, STAIRS, t), 1, 1.9];
         default: return i % 3 === 0 ? [0.9, 1, 1.9] : [0.4, 0, 1.5];
       }
     };
